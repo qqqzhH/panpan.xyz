@@ -1,0 +1,741 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>墨极 MOJI · 2026-08-22 日报</title>
+<meta name="description" content="墨极 · 机器手书的每日新闻。黑白两色，不着一彩，原文可溯。">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'><rect width='64' height='64' rx='10' fill='%23b0392e'/><rect x='15' y='15' width='34' height='34' fill='none' stroke='%23f5f2ec' stroke-width='5'/></svg>">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Ma+Shan+Zheng&family=Noto+Serif+SC:wght@400;600;700;900&display=swap" rel="stylesheet">
+<style>
+/* ============ 底色与变量（日读 / 夜读） ============ */
+:root {
+  --paper:#f5f2ec; --card:#faf7ee; --ink:#17140f;
+  --body-c:#45413a; --soft:#6f6858; --grey:#8a8578;
+  --red:#b0392e; --line:rgba(23,20,15,.16); --deep-bg:rgba(23,20,15,.05);
+}
+body.night {
+  --paper:#15110c; --card:#1d1812; --ink:#ece5d4;
+  --body-c:#b2a893; --soft:#9a8f7a; --grey:#7c7462;
+  --red:#d0483a; --line:rgba(236,229,212,.17); --deep-bg:rgba(236,229,212,.06);
+}
+
+* { box-sizing:border-box; margin:0; padding:0; }
+html { scroll-behavior:smooth; }
+body {
+  background:var(--paper); color:var(--ink);
+  font-family:"Noto Serif SC","Songti SC","SimSun",serif;
+  min-height:100vh;
+  transition:background .35s ease, color .35s ease;
+}
+::selection { background:var(--red); color:#f5f2ec; }
+a { color:inherit; }
+section[id], article[id] { scroll-margin-top:66px; }
+.wrap { max-width:1180px; margin:0 auto; padding-left:clamp(18px,4vw,44px); padding-right:clamp(18px,4vw,44px); }
+.num { font-family:Georgia,"Times New Roman",serif; }
+
+/* 顶部阅读进度墨线 */
+#progress { position:fixed; top:0; left:0; height:3px; width:0; background:var(--red); z-index:100; }
+
+/* ============ 顶栏（时辰钟 / 墨相） ============ */
+.topbar { background:var(--ink); color:var(--paper); font-size:11px; letter-spacing:.22em; }
+.topbar-in { display:flex; justify-content:space-between; align-items:center; gap:18px; padding:7px 0; flex-wrap:wrap; }
+.topbar-in > span { opacity:.85; white-space:nowrap; }
+.topbar .num { letter-spacing:.12em; }
+
+/* ============ 报头 ============ */
+.masthead { text-align:center; padding:clamp(26px,4.5vh,46px) 0 24px; border-bottom:3px double var(--ink); position:relative; overflow:hidden; }
+.masthead::before {
+  content:"墨"; position:absolute; left:50%; top:50%;
+  transform:translate(-50%,-54%);
+  font-family:"Ma Shan Zheng","Kaiti SC","KaiTi",serif;
+  font-size:min(30vw,300px); line-height:1;
+  color:var(--ink); opacity:.045;
+  pointer-events:none; user-select:none;
+}
+.masthead > * { position:relative; z-index:1; }
+.masthead h1 {
+  font-size:clamp(44px,7vw,76px); font-weight:900;
+  letter-spacing:.35em; text-indent:.35em; line-height:1.1;
+  display:inline-flex; align-items:flex-start;
+}
+.stamp {
+  font-family:"Ma Shan Zheng","Kaiti SC","KaiTi",serif;
+  width:.62em; height:.62em; margin-left:.18em;
+  background:var(--red); color:#f6f1e6;
+  display:inline-flex; align-items:center; justify-content:center;
+  font-size:.42em; font-weight:400; letter-spacing:0; text-indent:0;
+  border-radius:.08em; transform:rotate(-8deg) translateY(-.08em);
+  box-shadow:0 3px 10px rgba(176,57,46,.3);
+  user-select:none;
+}
+.masthead .sub { margin-top:14px; font-size:12px; letter-spacing:.42em; text-indent:.42em; color:var(--soft); }
+
+/* 日期带（含翻期） */
+.dateband {
+  display:grid; grid-template-columns:1fr auto 1fr; align-items:center; gap:12px;
+  padding:10px 2px; border-bottom:1px solid var(--line);
+  font-size:12px; letter-spacing:.15em; color:var(--soft);
+}
+.dateband .mid { text-align:center; }
+.dateband .right { text-align:right; letter-spacing:.2em; }
+.daynav { display:flex; gap:16px; }
+.right.daynav { justify-content:flex-end; }
+.day-link { text-decoration:none; letter-spacing:.12em; transition:color .2s ease; }
+.day-link:not(.disabled):hover { color:var(--red); }
+.day-link.disabled { opacity:.35; cursor:default; }
+
+/* ============ 频道导航（吸顶） ============ */
+.nav { position:sticky; top:0; z-index:60; background:var(--ink); color:var(--paper); }
+.nav-in { display:flex; align-items:stretch; justify-content:space-between; gap:16px; }
+.nav-links { display:flex; gap:clamp(16px,3vw,40px); overflow-x:auto; scrollbar-width:none; }
+.nav-links::-webkit-scrollbar { display:none; }
+.nav-links a {
+  color:var(--paper); opacity:.8; text-decoration:none;
+  font-size:13.5px; letter-spacing:.35em; white-space:nowrap;
+  padding:13px 2px 11px; border-bottom:2px solid transparent;
+  transition:opacity .25s ease, border-color .25s ease;
+}
+.nav-links a:hover { opacity:1; }
+.nav-links a.active { opacity:1; font-weight:700; border-color:var(--red); }
+.nav-extra { display:flex; align-items:center; }
+.night-btn {
+  display:flex; align-items:center; justify-content:center;
+  background:transparent; color:inherit; cursor:pointer;
+  border:1px solid rgba(245,242,236,.35); border-radius:999px;
+  padding:5px 9px; transition:all .25s ease; line-height:0;
+}
+.night-btn:hover { background:rgba(245,242,236,.12); border-color:rgba(245,242,236,.7); transform:scale(1.06); }
+/* 太极图标：黑白两色即昼夜 */
+.taiji-icon {
+  position:relative; display:block; width:26px; height:26px; border-radius:50%;
+  background:linear-gradient(90deg, var(--ink) 50%, var(--paper) 50%);
+  box-shadow:0 0 0 1.5px currentColor;
+  animation:taiji-spin 16s linear infinite;
+}
+.taiji-icon::before, .taiji-icon::after {
+  content:""; position:absolute; left:50%; transform:translateX(-50%);
+  width:50%; height:50%; border-radius:50%;
+}
+.taiji-icon::before { top:0; background:var(--paper); box-shadow:inset 0 0 0 1px var(--ink); }
+.taiji-icon::after  { bottom:0; background:var(--ink); }
+.tj-eye-b, .tj-eye-w {
+  position:absolute; left:50%; transform:translateX(-50%);
+  width:4.5px; height:4.5px; border-radius:50%;
+}
+.tj-eye-b { top:4px; background:var(--ink); }
+.tj-eye-w { bottom:4px; background:var(--paper); }
+@keyframes taiji-spin { to { transform:rotate(360deg); } }
+
+/* ============ 快讯滚动条 ============ */
+.ticker { display:flex; align-items:stretch; border-bottom:1px solid var(--line); background:var(--card); }
+.tick-label {
+  flex-shrink:0; background:var(--red); color:#f6f1e6;
+  font-size:11.5px; font-weight:900; letter-spacing:.4em; text-indent:.4em;
+  padding:11px 14px; display:flex; align-items:center;
+}
+.tick-clip { overflow:hidden; flex:1; display:flex; align-items:center; }
+.tick-track { display:flex; width:max-content; animation:tickmove 55s linear infinite; }
+.ticker:hover .tick-track { animation-play-state:paused; }
+@keyframes tickmove { to { transform:translateX(-50%); } }
+.tick-track a {
+  font-size:12.5px; color:var(--body-c); text-decoration:none;
+  letter-spacing:.08em; white-space:nowrap; padding:10px 0; margin-right:64px;
+}
+.tick-track a i { color:var(--red); font-style:normal; font-size:9px; margin-right:8px; vertical-align:2px; }
+.tick-track a:hover { color:var(--red); }
+
+/* ============ 头版：头条 + 要闻速览 ============ */
+.front { display:grid; grid-template-columns:minmax(0,1fr) 300px; gap:clamp(26px,4vw,52px); padding-top:clamp(24px,4vh,40px); }
+
+.hero { position:relative; padding-bottom:10px; }
+.wm {
+  position:absolute; right:0; top:0;
+  font-size:clamp(84px,9vw,150px); font-weight:900; line-height:.9;
+  color:var(--ink); opacity:.06;
+  pointer-events:none; user-select:none;
+}
+.meta {
+  display:flex; align-items:baseline; gap:12px; flex-wrap:wrap;
+  font-size:11.5px; color:var(--grey); letter-spacing:.14em; margin-bottom:12px;
+}
+.cat {
+  font-weight:900; font-size:11.5px;
+  color:var(--paper); background:var(--ink);
+  padding:3px 8px 3px 10px; letter-spacing:.28em;
+}
+.cat.hot, .cat.top { background:var(--red); }
+.time { letter-spacing:.08em; }
+.src { margin-left:auto; max-width:44%; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+.hero .hl {
+  font-size:clamp(28px,3.6vw,42px); font-weight:900; line-height:1.4;
+  letter-spacing:.01em; margin-bottom:14px; max-width:26ch;
+}
+.hero .hl a, .lead .hl a { color:inherit; text-decoration:none; }
+.hero .hl a:hover, .lead .hl a:hover,
+.card h3 a:hover { background:var(--ink); color:var(--paper); padding:2px 8px; margin-left:-8px; }
+.standfirst { font-size:clamp(15.5px,1.6vw,17px); line-height:2.1; color:var(--body-c); text-align:justify; max-width:62ch; }
+.foot { display:flex; align-items:baseline; gap:24px; margin-top:14px; flex-wrap:wrap; }
+.origin { color:var(--red); font-weight:700; font-size:12.5px; letter-spacing:.18em; text-decoration:none; }
+.origin:hover { text-decoration:underline; }
+.deep-toggle {
+  cursor:pointer; user-select:none;
+  font-size:12px; letter-spacing:.3em; color:var(--grey);
+  border-bottom:1px dashed var(--grey); padding-bottom:2px;
+}
+.deep-toggle:hover { color:var(--ink); border-color:var(--ink); }
+.deep {
+  display:none; margin-top:14px; padding:16px 20px;
+  background:var(--deep-bg); border-left:3px solid var(--red);
+  font-size:13.5px; line-height:2.05; color:var(--body-c);
+  text-align:justify; white-space:pre-wrap;
+}
+.deep.open { display:block; }
+
+/* 要闻速览侧栏 */
+.digest { border-left:1px solid var(--line); padding-left:clamp(20px,2.5vw,34px); }
+.digest-title {
+  display:flex; align-items:center; gap:10px;
+  font-size:13px; font-weight:900; letter-spacing:.45em; text-indent:.1em;
+  margin-bottom:6px;
+}
+.digest-title .sq { width:8px; height:8px; background:var(--red); flex-shrink:0; }
+.digest-item {
+  display:flex; gap:12px; align-items:baseline;
+  padding:13px 2px; border-bottom:1px dotted var(--line);
+  text-decoration:none;
+}
+.digest-item .num { color:var(--red); font-weight:700; font-size:15px; min-width:24px; }
+.digest-item .t { font-size:14px; font-weight:700; line-height:1.75; }
+.digest-item:hover .t { color:var(--red); }
+
+/* 栏头（频道与往期通用） */
+.ch-head {
+  display:flex; align-items:baseline; justify-content:space-between; gap:14px;
+  border-bottom:2px solid var(--ink); padding-bottom:10px;
+}
+.ch-head h2 { font-size:clamp(22px,2.6vw,30px); font-weight:900; letter-spacing:.32em; }
+.ch-seal {
+  display:inline-flex; width:20px; height:20px; align-items:center; justify-content:center;
+  background:var(--red); color:#f6f1e6; border-radius:3px;
+  font-family:"Ma Shan Zheng","Kaiti SC","KaiTi",serif; font-size:12px; font-weight:400;
+  transform:rotate(-6deg) translateY(-3px); margin-left:10px; letter-spacing:0; text-indent:0;
+}
+.ch-en { font-family:Georgia,"Times New Roman",serif; font-size:12px; color:var(--grey); letter-spacing:.22em; white-space:nowrap; }
+
+/* ============ 频道区块 ============ */
+.channel { margin-top:clamp(44px,7vh,66px); }
+.lead { position:relative; padding:clamp(22px,3.5vh,32px) 0 clamp(24px,3.5vh,34px); }
+.lead .hl { font-size:clamp(23px,2.7vw,33px); font-weight:900; line-height:1.45; margin-bottom:12px; max-width:32ch; }
+.lead .lead-p { font-size:15px; line-height:2; color:var(--body-c); text-align:justify; max-width:64ch; }
+.grid2 { display:grid; grid-template-columns:1fr 1fr; column-gap:clamp(30px,4.5vw,60px); }
+.card { border-top:1px solid var(--line); padding:22px 0 26px; position:relative; }
+.card h3 { font-size:clamp(18px,1.9vw,22px); font-weight:900; line-height:1.55; margin-bottom:10px; }
+.card h3 a { color:inherit; text-decoration:none; }
+.card p { font-size:13.5px; line-height:1.95; color:var(--body-c); text-align:justify; }
+.card .no { color:var(--red); font-weight:700; font-size:13px; }
+.article:target { animation:flash 1.8s ease; }
+@keyframes flash { 0% { background:rgba(176,57,46,.09); } 100% { background:transparent; } }
+
+/* ============ 往期回顾 ============ */
+.archive { margin-top:clamp(44px,7vh,66px); }
+.arch-grid { display:flex; flex-wrap:wrap; border-top:1px solid var(--line); border-left:1px solid var(--line); }
+.arch-item {
+  flex:1 1 220px; min-width:200px;
+  background:var(--paper); text-decoration:none;
+  padding:18px 20px 16px;
+  border-right:1px solid var(--line); border-bottom:1px solid var(--line);
+  transition:background .25s ease;
+}
+.arch-item:hover { background:var(--card); }
+.arch-date { display:block; font-size:clamp(20px,2vw,26px); font-weight:700; letter-spacing:.06em; }
+.arch-item:hover .arch-date { color:var(--red); }
+.arch-meta { display:block; margin-top:6px; font-size:11px; letter-spacing:.2em; color:var(--grey); }
+.arch-empty { padding:26px 20px; font-size:12px; letter-spacing:.3em; color:var(--grey); }
+
+/* ============ 报尾 ============ */
+.band { margin-top:clamp(60px,9vh,90px); background:var(--ink); color:var(--paper); padding:38px 0 44px; text-align:center; }
+.band .band-title { font-size:20px; font-weight:900; letter-spacing:.5em; text-indent:.5em; margin-bottom:12px; }
+.band p { letter-spacing:.4em; font-size:11px; opacity:.85; margin:7px 0; }
+.band .band-hint { opacity:.45; letter-spacing:.3em; }
+.band .stamp-mini {
+  display:inline-flex; width:22px; height:22px; align-items:center; justify-content:center;
+  background:var(--red); color:#f6f1e6; border-radius:4px;
+  font-family:"Ma Shan Zheng","Kaiti SC","KaiTi",serif; font-size:13px; font-weight:400;
+  transform:rotate(-8deg); letter-spacing:0; text-indent:0; vertical-align:-4px; margin-left:6px;
+}
+
+/* 回顶印章 */
+.seal-top {
+  position:fixed; right:26px; bottom:30px; z-index:80;
+  width:52px; height:52px; border:none; border-radius:8px;
+  background:var(--red); color:#f6f1e6; cursor:pointer;
+  font-family:"Ma Shan Zheng","Kaiti SC","KaiTi",serif; font-size:17px;
+  writing-mode:vertical-rl; letter-spacing:.2em; line-height:52px; text-align:center;
+  transform:rotate(-6deg) scale(.5); opacity:0; pointer-events:none;
+  transition:all .45s cubic-bezier(.34,1.4,.64,1);
+  box-shadow:0 6px 18px rgba(0,0,0,.28);
+}
+.seal-top.on { opacity:1; transform:rotate(-6deg) scale(1); pointer-events:auto; }
+.seal-top:hover { box-shadow:0 8px 24px rgba(176,57,46,.45); }
+
+/* 右缘竖排署名 */
+.side-mark {
+  position:fixed; right:clamp(8px,1.5vw,22px); top:50%;
+  transform:translateY(-50%) rotate(90deg); transform-origin:center;
+  font-size:10px; letter-spacing:.4em; color:var(--ink); opacity:.28;
+  white-space:nowrap; pointer-events:none; z-index:5;
+}
+
+/* ============ 响应式 ============ */
+@media (max-width:1060px) {
+  .front { grid-template-columns:1fr; }
+  .digest { border-left:none; border-top:2px solid var(--ink); padding:22px 0 0; margin-top:6px; }
+  .side-mark { display:none; }
+}
+@media (max-width:860px) {
+  .arch-item { flex-basis:45%; }
+  .wm { font-size:clamp(64px,14vw,100px); }
+}
+@media (max-width:680px) {
+  .grid2 { grid-template-columns:1fr; }
+  .arch-item { flex-basis:100%; }
+  .dateband { grid-template-columns:1fr; text-align:center; }
+  .dateband .mid, .dateband .right { text-align:center; }
+  .daynav { justify-content:center; }
+  .src { max-width:100%; }
+  .seal-top { right:16px; bottom:20px; }
+}
+@media (prefers-reduced-motion:reduce) {
+  html { scroll-behavior:auto; }
+  .tick-track { animation:none; }
+  .tick-clip { overflow-x:auto; }
+  .seal-top { transition:none; }
+  .taiji-icon { animation:none; }
+  .article:target { animation:none; }
+}
+</style>
+</head>
+<body>
+<div id="progress" aria-hidden="true"></div>
+
+<!-- 顶栏 -->
+<div class="topbar">
+  <div class="wrap topbar-in">
+    <span class="tb-left"><span class="num" id="clockTime">--:--</span>　<span id="clockHr">--</span></span>
+    <span class="tb-right">☂ 雨 · 淋漓酣畅</span>
+  </div>
+</div>
+
+<!-- 报头 -->
+<header class="masthead">
+  <div class="wrap">
+    <h1>墨极<span class="stamp">印</span></h1>
+    <p class="sub">机器手书 · 不着一彩 · 原文可溯</p>
+  </div>
+</header>
+<div class="wrap">
+  <div class="dateband">
+    <span class="left daynav"><a class="day-link num" href="墨极·20260821.html">← 08.21 前一日</a></span>
+    <span class="mid num">2026-08-22 星期六 · 第 234 期 · 11 条</span>
+    <span class="right daynav"><a class="day-link num" href="墨极·20260823.html">后一日 08.23 →</a></span>
+  </div>
+</div>
+
+<!-- 频道导航 -->
+<nav class="nav">
+  <div class="wrap nav-in">
+    <div class="nav-links">
+      <a href="#front" class="active">头条</a>
+      <a href="#sec-ai">科技</a>
+      <a href="#sec-robotics">机器人</a>
+      <a href="#sec-geopolitics">国际</a>
+      <a href="#sec-finance">财经</a>
+      <a href="#archive">往期</a>
+    </div>
+    <div class="nav-extra">
+      <button class="night-btn" id="nightBtn" title="夜读模式（快捷键 N）" aria-label="切换夜读模式"><span class="taiji-icon" aria-hidden="true"><span class="tj-eye-b"></span><span class="tj-eye-w"></span></span></button>
+    </div>
+  </div>
+</nav>
+
+<!-- 快讯 -->
+<div class="ticker" aria-label="快讯">
+  <span class="tick-label">快讯</span>
+  <div class="tick-clip">
+    <div class="tick-track">
+        <a href="#hero"><i>◆</i>刚刚，官媒重磅发文，释放强烈信号！8月24日周一，A股没太大悬念</a>
+        <a href="#a4"><i>◆</i>专家担心特朗普与金正恩再次会晤恐成又一次外交挫败</a>
+        <a href="#a5"><i>◆</i>国际观察丨美国对伊朗“史上最严制裁”能奏效吗-新华网</a>
+        <a href="#a6"><i>◆</i>美伊进入“经济战”，中东局势何去何从？_京报网</a>
+        <a href="#a7"><i>◆</i>俄乌加强无人机远程打击，试图瘫痪对方经济基础设施</a>
+        <a href="#a8"><i>◆</i>土耳其押注美国避免冲突，而以色列则扩大了对叙利亚的红线。 - AL-…</a>
+        <a href="#hero"><i>◆</i>刚刚，官媒重磅发文，释放强烈信号！8月24日周一，A股没太大悬念</a>
+        <a href="#a4"><i>◆</i>专家担心特朗普与金正恩再次会晤恐成又一次外交挫败</a>
+        <a href="#a5"><i>◆</i>国际观察丨美国对伊朗“史上最严制裁”能奏效吗-新华网</a>
+        <a href="#a6"><i>◆</i>美伊进入“经济战”，中东局势何去何从？_京报网</a>
+        <a href="#a7"><i>◆</i>俄乌加强无人机远程打击，试图瘫痪对方经济基础设施</a>
+        <a href="#a8"><i>◆</i>土耳其押注美国避免冲突，而以色列则扩大了对叙利亚的红线。 - AL-…</a>
+    </div>
+  </div>
+</div>
+
+<main class="wrap">
+
+  <!-- ===== 头版 ===== -->
+  <section id="front" class="front">
+    <div class="hero">
+      <span class="wm num" aria-hidden="true">01</span>
+      <div class="meta">
+        <span class="cat top">头条</span><span class="cat">财经</span>
+        <span class="time num">8月23日</span>
+        <span class="src">源 · Exa 搜索</span>
+      </div>
+      <h2 class="hl"><a href="https://www.163.com/dy/article/L4V0Q3VP05561UAV.html?f=post1603_tab_news" target="_blank" rel="noopener">刚刚，官媒重磅发文，释放强烈信号！8月24日周一，A股没太大悬念</a></h2>
+      <p class="standfirst">0 本周五A股收官，上证指数收于3905点，艰难守住3900点整数关口。</p>
+      <div class="foot">
+        <a class="origin" href="https://www.163.com/dy/article/L4V0Q3VP05561UAV.html?f=post1603_tab_news" target="_blank" rel="noopener">阅读原文 ↗</a>
+      <span class="deep-toggle">展墨 ▼</span>
+        <div class="deep">1. 政策信号明确：官媒“钟才文”发文定调经济韧性，强调GDP、工业利润及高科技产业数据，释放“底线思维+政策托底”信号，直接对冲短期悲观预期。  
+2. 多空博弈僵持：上证守住3900点，但成交额缩至1.89万亿，量能不足制约上行；美债收益率高位、油价上涨构成外部压制，市场进入“政策底”与“市场底”拉锯阶段。  
+3. 短期走势预判：政策暖风+外盘反弹支撑高开，但流动性收紧与盈利挤压限制涨幅，大概率维持震荡，方向需等待量能确认。  </div>
+      </div>
+    </div>
+
+    <aside class="digest">
+      <p class="digest-title"><span class="sq"></span>要闻速览</p>
+      <a class="digest-item" href="#a4"><span class="num">04</span><span class="t">专家担心特朗普与金正恩再次会晤恐成又一次外交挫败</span></a>
+      <a class="digest-item" href="#a5"><span class="num">05</span><span class="t">国际观察丨美国对伊朗“史上最严制裁”能奏效吗-新华网</span></a>
+      <a class="digest-item" href="#a6"><span class="num">06</span><span class="t">美伊进入“经济战”，中东局势何去何从？_京报网</span></a>
+      <a class="digest-item" href="#a7"><span class="num">07</span><span class="t">俄乌加强无人机远程打击，试图瘫痪对方经济基础设施</span></a>
+      <a class="digest-item" href="#a8"><span class="num">08</span><span class="t">土耳其押注美国避免冲突，而以色列则扩大了对叙利亚的红线。 -…</span></a>
+    </aside>
+  </section>
+
+  <!-- ===== 科技 ===== -->
+  <section id="sec-ai" class="channel">
+    <div class="ch-head">
+      <h2>科技<span class="ch-seal">科</span></h2>
+      <span class="ch-en">TECH · 1 篇</span>
+    </div>
+    <div class="grid2">
+      <article class="card article" id="a2" data-num="2">
+        <div class="meta">
+          <span class="no num">02</span><span class="cat">科技</span>
+          <span class="time num">8月22日 08:00</span>
+          <span class="src">源 · IT之家（RSS）</span>
+        </div>
+        <h3><a href="https://www.ithome.com/0/993/105.htm" target="_blank" rel="noopener">第二届世界人形机器人运动会开幕：2056 台机器人齐聚“冰丝带”，666 支队伍竞技 51 赛项</a></h3>
+        <p>第二届世界人形机器人运动会今晚在国家速滑馆“冰丝带”开幕，666 支队伍、2056 台机器人参赛，队伍数量较首届增长 138%，机器人数量翻了两番。</p>
+        <div class="foot">
+          <a class="origin" href="https://www.ithome.com/0/993/105.htm" target="_blank" rel="noopener">阅读原文 ↗</a>
+        <span class="deep-toggle">展墨 ▼</span>
+        <div class="deep">本届人形机器人运动会呈现三大信号：一是规模跃升，参赛队伍与机器人数量分别增长138%和4倍，显示产业从实验室迈向规模化应用；二是技术突破，天工Ultra百米9.39秒、荣耀&quot;闪电&quot;400米41.95秒均超越人类顶尖选手，标志运动控制与能量管理达到新高度；三是自主性升级，多项赛事取消人工遥控，全自主运行验证了AI决策与实时适应能力。
+短期看，竞技成绩的&quot;破纪录&quot;具有强传播效应，将加速公众认知普及，并吸引资本向具身智能赛道倾斜。中长期，全自主竞技背后是感知-规划-控制闭环的成熟，这直接指向工业巡检、物流搬运等复杂场景的商用落地。但需注意，速度突破依赖特定仿生结构，与通用性仍存差距；同时，赛制从遥控到自主的转变，也倒逼行业建立新的安全评估标准。整体而言，这届运动会不仅是技术秀场，更是人形机器人从&quot;展示品&quot;转向&quot;生产力工具&quot;的里程碑节点。</div>
+        </div>
+      </article>
+    </div>
+  </section>
+  <!-- ===== 机器人 ===== -->
+  <section id="sec-robotics" class="channel">
+    <div class="ch-head">
+      <h2>机器人<span class="ch-seal">器</span></h2>
+      <span class="ch-en">ROBOTICS · 1 篇</span>
+    </div>
+    <div class="grid2">
+      <article class="card article" id="a3" data-num="3">
+        <div class="meta">
+          <span class="no num">03</span><span class="cat hot">机器人</span>
+          <span class="time num">8月22日 08:00</span>
+          <span class="src">源 · Exa 搜索</span>
+        </div>
+        <h3><a href="https://www.news.cn/tech/20260822/662b320f66c842488ee3186c51752125/c.html" target="_blank" rel="noopener">从两场世界级大会看中国机器人产业新气象-新华网</a></h3>
+        <p>Exa 搜索（Exa）是一家专注于人工智能驱动的网络搜索初创公司，近期完成新一轮融资，总额达 1700 万美元，由 Lightspeed Venture Partners 领投，参与者包括 Nvidia 旗下风投部门 N</p>
+        <div class="foot">
+          <a class="origin" href="https://www.news.cn/tech/20260822/662b320f66c842488ee3186c51752125/c.html" target="_blank" rel="noopener">阅读原文 ↗</a>
+        <span class="deep-toggle">展墨 ▼</span>
+        <div class="deep">本次新闻聚焦于中国机器人产业在全球舞台的崛起，而非传统互联网搜索企业动态。Exa 的融资案例实为 AI 基础设施领域的独立事件，与“机器人产业”无直接关联，但可视为 AI 技术生态繁荣的缩影。核心信号在于：中国机器人产业正通过世界级大会展示技术突破（如人形机器人、工业自动化），并加速从“跟跑”向“领跑”转型，产业链协同效应显著。  
+1. 产业升级提速：中国机器人企业在核心零部件（减速器、伺服系统）与 AI 算法融合上取得进展，推动成本下降与场景落地，制造业自动化渗透率有望进一步提升。  
+2. 全球竞争格局重塑：中国在新能源、3C 等垂直领域的定制化方案输出，正挑战日欧传统优势，国际展会成为技术话语权争夺的关键战场。  </div>
+        </div>
+      </article>
+    </div>
+  </section>
+  <!-- ===== 国际 ===== -->
+  <section id="sec-geopolitics" class="channel">
+    <div class="ch-head">
+      <h2>国际<span class="ch-seal">国</span></h2>
+      <span class="ch-en">WORLD · 5 篇</span>
+    </div>
+    <article class="lead article" id="a4" data-num="4">
+      <span class="wm num" aria-hidden="true">04</span>
+      <div class="meta">
+        <span class="no num">04</span><span class="cat hot">国际</span>
+        <span class="time num">8月22日 09:07</span>
+        <span class="src">源 · Exa 搜索</span>
+      </div>
+      <h2 class="hl"><a href="https://www.rfi.fr/cn/%E4%B8%93%E6%A0%8F%E6%A3%80%E7%B4%A2/%E6%B3%95%E5%9B%BD%E6%8A%A5%E7%BA%B8%E6%91%98%E8%A6%81/20260821-%E4%B8%93%E5%AE%B6%E6%8B%85%E5%BF%83%E7%89%B9%E6%9C%97%E6%99%AE%E4%B8%8E%E9%87%91%E6%AD%A3%E6%81%A9%E5%86%8D%E6%AC%A1%E4%BC%9A%E6%99%A4%E4%BC%9A%E6%98%AF%E5%8F%88%E4%B8%80%E6%AC%A1%E5%A4%96%E4%BA%A4%E6%8C%AB%E8%B4%A5" target="_blank" rel="noopener">专家担心特朗普与金正恩再次会晤恐成又一次外交挫败</a></h2>
+      <p class="lead-p">发表时间： 21/08/2026 - 16:12 21日出版的法国全国性大报头版头条均以法国国内话题开篇。</p>
+      <div class="foot">
+        <a class="origin" href="https://www.rfi.fr/cn/%E4%B8%93%E6%A0%8F%E6%A3%80%E7%B4%A2/%E6%B3%95%E5%9B%BD%E6%8A%A5%E7%BA%B8%E6%91%98%E8%A6%81/20260821-%E4%B8%93%E5%AE%B6%E6%8B%85%E5%BF%83%E7%89%B9%E6%9C%97%E6%99%AE%E4%B8%8E%E9%87%91%E6%AD%A3%E6%81%A9%E5%86%8D%E6%AC%A1%E4%BC%9A%E6%99%A4%E4%BC%9A%E6%98%AF%E5%8F%88%E4%B8%80%E6%AC%A1%E5%A4%96%E4%BA%A4%E6%8C%AB%E8%B4%A5" target="_blank" rel="noopener">阅读原文 ↗</a>
+      <span class="deep-toggle">展墨 ▼</span>
+        <div class="deep">特朗普计划在亚太经合组织会议期间与金正恩再度会晤，并大幅缩减美韩军演规模。此举意在复制新加坡式外交成果，但朝鲜已加速核导研发，且强化与中俄关系，经济制裁压力缓解，谈判动力不足。同时，中美战略竞争背景下，朝鲜半岛地缘价值上升，美韩同盟松动引发日韩对核威慑的焦虑，而特朗普对亚洲的忽视可能削弱盟友信心，并增加台海风险。
+1. 对美朝关系：特朗普急于求成，但朝鲜缺乏让步动机，会晤或沦为“表演性外交”，难以达成实质无核化协议，反而可能被朝方利用以突破国际孤立。  
+2. 对地区安全：缩减军演与调离航母，短期内缓解半岛军事压力，但中长期削弱美在亚太的威慑可信度，刺激日韩自主防务倾向，甚至推动核武装讨论，加剧军备竞赛风险。  </div>
+      </div>
+    </article>
+    <div class="grid2">
+      <article class="card article" id="a5" data-num="5">
+        <div class="meta">
+          <span class="no num">05</span><span class="cat">国际</span>
+          <span class="time num">8月22日 08:00</span>
+          <span class="src">源 · Exa 搜索</span>
+        </div>
+        <h3><a href="https://www.news.cn/20260822/55b3acfc267e40f98e81189eb95a173d/c.html" target="_blank" rel="noopener">国际观察丨美国对伊朗“史上最严制裁”能奏效吗-新华网</a></h3>
+        <p>Exa 搜索是一家专注于人工智能驱动的搜索引擎初创公司，近期完成新一轮融资，总额达 1700 万美元，由 Lightspeed Venture Partners 领投，参与者包括 Nvidia 旗下风险投资部门 NVen</p>
+        <div class="foot">
+          <a class="origin" href="https://www.news.cn/20260822/55b3acfc267e40f98e81189eb95a173d/c.html" target="_blank" rel="noopener">阅读原文 ↗</a>
+        <span class="deep-toggle">展墨 ▼</span>
+        <div class="deep">美国对伊朗推出“史上最严制裁”，本质是极限施压策略的延续，目标直指伊朗石油出口与金融结算通道，意图切断其核心经济命脉。此举短期内将加剧伊朗通胀压力与货币贬值，但伊朗已非首次面临类似封锁，其通过非官方渠道出口石油、深化与中俄的本币结算机制，具备一定缓冲能力。  
+1. 地缘博弈层面：制裁将迫使伊朗加速“向东看”，强化与中俄的战略协作，同时刺激地区代理人冲突风险上升，中东能源运输通道（霍尔木兹海峡）的不确定性增加。  
+2. 能源市场冲击：伊朗每日约150万桶的原油出口若显著收缩，将扰动全球供需平衡，叠加OPEC+减产政策，油价短期或获支撑，但美国战略储备释放及非OPEC增产可能部分对冲。  </div>
+        </div>
+      </article>
+      <article class="card article" id="a6" data-num="6">
+        <div class="meta">
+          <span class="no num">06</span><span class="cat">国际</span>
+          <span class="time num">8月22日 08:00</span>
+          <span class="src">源 · Exa 搜索</span>
+        </div>
+        <h3><a href="https://news.bjd.com.cn/2026/08/22/11927607.shtml" target="_blank" rel="noopener">美伊进入“经济战”，中东局势何去何从？_京报网</a></h3>
+        <p>伊朗外交部发言人巴加埃8月22日说，美国宣称对伊朗实施新的经济制裁，在国际法层面毫无依据。</p>
+        <div class="foot">
+          <a class="origin" href="https://news.bjd.com.cn/2026/08/22/11927607.shtml" target="_blank" rel="noopener">阅读原文 ↗</a>
+        <span class="deep-toggle">展墨 ▼</span>
+        <div class="deep">美伊博弈已从军事威慑转向经济绞杀，美国单边制裁升级为“二级制裁”，试图强迫全球主体选边站队。此举本质是以国内法凌驾国际法，破坏多边贸易规则。同时，北约对霍尔木兹海峡议题的审慎态度，暴露美欧战略利益分化——欧洲不愿为美方冒险背书，更忌惮能源通道风险外溢至自身经济安全。
+1. 经济层面：美国“长臂管辖”将推高全球能源与航运成本，加剧供应链碎片化，尤其冲击依赖中东原油的亚洲经济体。但欧盟、中俄等主要力量大概率抵制二级制裁，削弱美方实际执行力，形成“制裁孤岛”效应。  
+2. 地缘层面：美伊冲突长期化将刺激伊朗加速核计划与代理人行动，中东安全真空扩大。北约若仅限“事后维和”角色，实为对美战略承诺的降级，反映联盟内部对伊朗政策、对华竞争优先级的分歧。  </div>
+        </div>
+      </article>
+      <article class="card article" id="a7" data-num="7">
+        <div class="meta">
+          <span class="no num">07</span><span class="cat">国际</span>
+          <span class="time num">8月22日 08:00</span>
+          <span class="src">源 · Exa 搜索</span>
+        </div>
+        <h3><a href="https://www.voachinese.com/a/russia-ukraine-ramp-up-drone-campaigns-aiming-to-cripple-other-s-economic-infrastructure-20260822/8189256.html" target="_blank" rel="noopener">俄乌加强无人机远程打击，试图瘫痪对方经济基础设施</a></h3>
+        <p>- 美国之音 俄乌加强无人机远程打击，试图瘫痪对方经济基础设施 分享 分享 评论 资料照片：乌克兰军人准备向哈尔科夫地区的俄军发射FP-2型攻击无人机。</p>
+        <div class="foot">
+          <a class="origin" href="https://www.voachinese.com/a/russia-ukraine-ramp-up-drone-campaigns-aiming-to-cripple-other-s-economic-infrastructure-20260822/8189256.html" target="_blank" rel="noopener">阅读原文 ↗</a>
+        <span class="deep-toggle">展墨 ▼</span>
+        <div class="deep">1. 俄乌冲突进入新阶段，双方战略重心转向经济基础设施的远程打击，无人机成为核心战术工具。
+2. 袭击目标从军事设施扩展至电商物流中心、炼油厂、港口等民用经济节点，意图削弱对方战争经济支撑能力。
+3. 乌克兰对俄境内目标的打击频次与烈度显著升级，俄方则以袭击购物中心作为报复回应，冲突螺旋升级风险加剧。</div>
+        </div>
+      </article>
+      <article class="card article" id="a8" data-num="8">
+        <div class="meta">
+          <span class="no num">08</span><span class="cat">国际</span>
+          <span class="time num">8月22日 08:00</span>
+          <span class="src">源 · Exa 搜索</span>
+        </div>
+        <h3><a href="https://www.al-monitor.com/zh-hans/originals/2026/08/tuerqiyazhumeiguobimianchongtueryiseliezekuodaleduixuliyadehongxian" target="_blank" rel="noopener">土耳其押注美国避免冲突，而以色列则扩大了对叙利亚的红线。 - AL-MONITOR: The Middle Eastʼs leading independent news source since 2012</a></h3>
+        <p>AL-MONITOR is an award-winning media outlet covering the Middle East, valued for its independence, diversity a</p>
+        <div class="foot">
+          <a class="origin" href="https://www.al-monitor.com/zh-hans/originals/2026/08/tuerqiyazhumeiguobimianchongtueryiseliezekuodaleduixuliyadehongxian" target="_blank" rel="noopener">阅读原文 ↗</a>
+        <span class="deep-toggle">展墨 ▼</span>
+        <div class="deep">1. 土耳其与以色列在叙利亚的博弈正从代理人层面升级为直接军事摩擦，阿布杜胡尔空袭事件标志着双方“红线”碰撞已逼近土耳其边境。  
+2. 美国试图推动建立冲突降级机制，但以色列凭借军事优势和美方战略依赖，缺乏实质性妥协动力，机制前景脆弱。  
+3. 叙利亚新政权（沙伊巴尼政府）在土以之间被迫选边，其主权诉求与大国博弈现实形成尖锐矛盾。  </div>
+        </div>
+      </article>
+    </div>
+  </section>
+  <!-- ===== 财经 ===== -->
+  <section id="sec-finance" class="channel">
+    <div class="ch-head">
+      <h2>财经<span class="ch-seal">财</span></h2>
+      <span class="ch-en">MARKETS · 3 篇</span>
+    </div>
+    <article class="lead article" id="a9" data-num="9">
+      <span class="wm num" aria-hidden="true">09</span>
+      <div class="meta">
+        <span class="no num">09</span><span class="cat">财经</span>
+        <span class="time num">8月22日 08:00</span>
+        <span class="src">源 · Exa 搜索</span>
+      </div>
+      <h2 class="hl"><a href="https://finance.sina.com.cn/jjxw/2026-08-22/doc-inipcwvt6183425.shtml" target="_blank" rel="noopener">美股全线上涨，金价重回4600美元</a></h2>
+      <p class="lead-p">当地时间8月21日，美股三大股指集体收涨，特斯拉大涨逾5%。</p>
+      <div class="foot">
+        <a class="origin" href="https://finance.sina.com.cn/jjxw/2026-08-22/doc-inipcwvt6183425.shtml" target="_blank" rel="noopener">阅读原文 ↗</a>
+      <span class="deep-toggle">展墨 ▼</span>
+        <div class="deep">本次市场异动由美国财政部扩大国债回购规模驱动，形成“美债利率预期管理→美元走弱→风险资产与黄金齐涨”的传导链条。表面看是流动性注入，实质是政策层对利率曲线失控的被动应对，而非主动宽松信号。特斯拉领涨反映市场风险偏好修复，但半导体板块分化显示资金并未全面转向。
+1. 美债市场：回购加码短期压利率，但美国财政赤字货币化倾向加剧，长端利率下行空间有限，治标难治本，后续需警惕发债高峰下的流动性虹吸效应。  
+2. 权益资产：政策托底缓解恐慌，但基本面（盈利预期、估值）与利率环境的矛盾未解，反弹持续性存疑，需观察美联储是否配合释放鸽派信号。  </div>
+      </div>
+    </article>
+    <div class="grid2">
+      <article class="card article" id="a10" data-num="10">
+        <div class="meta">
+          <span class="no num">10</span><span class="cat hot">财经</span>
+          <span class="time num">8月22日 08:00</span>
+          <span class="src">源 · Exa 搜索</span>
+        </div>
+        <h3><a href="https://finance.sina.com.cn/stock/zqgd/2026-08-23/doc-inipfzva2719418.shtml" target="_blank" rel="noopener">40万亿债务压顶！美债风暴席卷全球，人民币资产能否成为避风港？读懂这背后三大逻辑！</a></h3>
+        <p>40万亿债务压顶！美债风暴席卷全球，人民币资产能否成为避风港？</p>
+        <div class="foot">
+          <a class="origin" href="https://finance.sina.com.cn/stock/zqgd/2026-08-23/doc-inipfzva2719418.shtml" target="_blank" rel="noopener">阅读原文 ↗</a>
+        <span class="deep-toggle">展墨 ▼</span>
+        <div class="deep">美债风暴本质是美元信用危机的显性化——40万亿美元债务压顶、利息支出占财政收入五分之一、再融资利率持续高于GDP增速，财政赤字自我强化的负循环已然形成。美国财政部&quot;借短还长&quot;的权宜之计仅维持一天效应，30年期收益率突破5.3%，已超越次贷危机前夜水平。
+第一，全球进入高成本生产时代。资金成本抬升叠加地缘冲突、逆全球化趋势，压缩全球利润空间，竞争力天平向具备极致成本控制能力的经济体倾斜。
+第二，人民币资产避险属性凸显。人民币中间价升至三年半新高，10年期国债收益率仅1.68%，A股制造业属性突出且估值低位，政策回旋空间充足，形成与美债风暴的显著分化。</div>
+        </div>
+      </article>
+      <article class="card article" id="a11" data-num="11">
+        <div class="meta">
+          <span class="no num">11</span><span class="cat hot">财经</span>
+          <span class="time num">8月22日 08:00</span>
+          <span class="src">源 · Exa 搜索</span>
+        </div>
+        <h3><a href="https://www.huxiu.com/article/4885186.html" target="_blank" rel="noopener">美债没救成，却坑了美元，黄金暴涨，贝森特“偷鸡不成蚀把米”-虎嗅网</a></h3>
+        <p>华尔街见闻 华尔街见闻 ，作者：杨宸 鲍奕龙，原文标题：《美债没救成，却坑了美元，黄金暴涨！</p>
+        <div class="foot">
+          <a class="origin" href="https://www.huxiu.com/article/4885186.html" target="_blank" rel="noopener">阅读原文 ↗</a>
+        <span class="deep-toggle">展墨 ▼</span>
+        <div class="deep">贝森特通过扩大回购压制长端美债收益率的操作，市场仅用不到一天便消化完毕。真正的连锁反应是美元走软、黄金突破4600美元、比特币涨超25%——&quot;货币贬值交易&quot;逻辑被强化。表面看是财政工具失效，实则是市场将美债抛售定性为财政信誉问题而非经济强劲信号，2万亿美元赤字叠加AI融资潮引发的资本争夺，使长端利率结构性承压。
+1. 政策公信力透支：财政部&quot;工具箱&quot;叙事边际效应递减，市场对政府干预的敏感度正在钝化，这反而加剧了&quot;政策依赖型&quot;交易的不稳定性。  
+2. 资产定价重构：黄金与比特币相关性升至疫情来高位，暗示资金正系统性对冲主权信用风险；30年期美债收益率5%成为关键分水岭，若突破将直接冲击AI等高杠杆估值体系。  </div>
+        </div>
+      </article>
+    </div>
+  </section>
+</main>
+
+<!-- ===== 往期回顾 ===== -->
+<section id="archive" class="archive wrap">
+  <div class="ch-head">
+    <h2>往期回顾<span class="ch-seal">档</span></h2>
+    <span class="ch-en">ARCHIVE</span>
+  </div>
+  <div class="arch-grid">
+    <a class="arch-item" href="墨极·20260827.html"><span class="arch-date num">08.27</span><span class="arch-meta">2026 · 星期四 · 12 条</span></a>
+    <a class="arch-item" href="墨极·20260826.html"><span class="arch-date num">08.26</span><span class="arch-meta">2026 · 星期三 · 8 条</span></a>
+    <a class="arch-item" href="墨极·20260825.html"><span class="arch-date num">08.25</span><span class="arch-meta">2026 · 星期二 · 12 条</span></a>
+    <a class="arch-item" href="墨极·20260824.html"><span class="arch-date num">08.24</span><span class="arch-meta">2026 · 星期一 · 9 条</span></a>
+    <a class="arch-item" href="墨极·20260823.html"><span class="arch-date num">08.23</span><span class="arch-meta">2026 · 星期日 · 10 条</span></a>
+    <a class="arch-item" href="墨极·20260821.html"><span class="arch-date num">08.21</span><span class="arch-meta">2026 · 星期五 · 12 条</span></a>
+  </div>
+</section>
+
+<!-- 报尾 -->
+<footer class="band">
+  <div class="wrap">
+    <p class="band-title">墨极<span class="stamp-mini">印</span></p>
+    <p>机器手书 · 旁注皆机器所拟 · 原文可溯</p>
+    <p>距明日 09:00 报讯 · <span class="num" id="cdNum2">--:--:--</span></p>
+    <p class="band-hint num">J / K 换条 · T 回顶 · N 夜读</p>
+  </div>
+</footer>
+
+<button class="seal-top" id="sealTop" title="回到卷首">回顶</button>
+<span class="side-mark">MOJI DAILY · 墨极编辑部 · 原文可溯</span>
+
+<script>
+(function(){
+  var body = document.body;
+
+  /* 夜读模式（记忆偏好） */
+  try { if (localStorage.getItem("moji-night") === "1") body.classList.add("night"); } catch(e) {}
+  function toggleNight(){
+    body.classList.toggle("night");
+    try { localStorage.setItem("moji-night", body.classList.contains("night") ? "1" : "0"); } catch(e) {}
+  }
+  document.getElementById("nightBtn").addEventListener("click", toggleNight);
+
+  /* 展墨 / 收墨 */
+  document.addEventListener("click", function(e){
+    var t = e.target;
+    if (t.classList && t.classList.contains("deep-toggle")) {
+      var art = t.closest("article") || t.closest(".hero");
+      var d = art && art.querySelector(".deep");
+      if (d) {
+        d.classList.toggle("open");
+        t.textContent = d.classList.contains("open") ? "收墨 ▲" : "展墨 ▼";
+      }
+    }
+  });
+
+  /* 时辰钟 */
+  var HRS = ["子时","丑时","寅时","卯时","辰时","巳时","午时","未时","申时","酉时","戌时","亥时"];
+  function tickClock(){
+    var n = new Date();
+    var hh = String(n.getHours()).padStart(2,"0");
+    var mm = String(n.getMinutes()).padStart(2,"0");
+    document.getElementById("clockTime").textContent = hh + ":" + mm;
+    document.getElementById("clockHr").textContent = HRS[Math.floor(((n.getHours()+1)%24)/2)];
+  }
+  tickClock(); setInterval(tickClock, 15000);
+
+  /* 距明日报讯（09:00）倒计时 */
+  function tickCountdown(){
+    var now = new Date();
+    var next = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 9, 0, 0);
+    if (now.getHours() >= 9) next = new Date(now.getFullYear(), now.getMonth(), now.getDate()+1, 9, 0, 0);
+    var diff = Math.max(0, next - now);
+    var h = String(Math.floor(diff/3600000)).padStart(2,"0");
+    var m = String(Math.floor(diff%3600000/60000)).padStart(2,"0");
+    var s = String(Math.floor(diff%60000/1000)).padStart(2,"0");
+    document.getElementById("cdNum2").textContent = h + ":" + m + ":" + s;
+  }
+  tickCountdown(); setInterval(tickCountdown, 1000);
+
+  /* 阅读进度 + 导航高亮 + 回顶印章 */
+  var bar = document.getElementById("progress");
+  var seal = document.getElementById("sealTop");
+  var arts = Array.prototype.slice.call(document.querySelectorAll("article[data-num]"));
+  var navLinks = Array.prototype.slice.call(document.querySelectorAll(".nav-links a"));
+  var SPY = ["front","sec-ai","sec-robotics","sec-geopolitics","sec-finance","sec-other","archive"];
+
+  function onScroll(){
+    var docH = document.documentElement.scrollHeight - window.innerHeight;
+    var pct = Math.min(100, Math.max(0, Math.round(window.scrollY / (docH || 1) * 100)));
+    bar.style.width = pct + "%";
+
+    var cur = SPY[0];
+    SPY.forEach(function(id){
+      var el = document.getElementById(id);
+      if (el && el.getBoundingClientRect().top < window.innerHeight * 0.42) cur = id;
+    });
+    navLinks.forEach(function(a){ a.classList.toggle("active", a.getAttribute("href") === "#" + cur); });
+
+    seal.classList.toggle("on", window.scrollY > window.innerHeight * 0.9);
+  }
+  window.addEventListener("scroll", onScroll, { passive:true });
+  onScroll();
+  seal.addEventListener("click", function(){ window.scrollTo({ top:0, behavior:"smooth" }); });
+
+  /* 键盘导航：J/K 换条 · T 回顶 · N 夜读 */
+  document.addEventListener("keydown", function(e){
+    if (e.target.tagName === "INPUT" || e.target.tagName === "TEXTAREA") return;
+    var k = e.key.toLowerCase();
+    if (k === "t") {
+      window.scrollTo({ top:0, behavior:"smooth" });
+    } else if (k === "n") {
+      toggleNight();
+    } else if (k === "j" || k === "k") {
+      var curIdx = -1;
+      arts.forEach(function(a, i){
+        if (curIdx === -1 && a.getBoundingClientRect().top > 70) curIdx = i;
+      });
+      var target;
+      if (k === "j") target = Math.max(0, curIdx === -1 ? arts.length - 1 : curIdx);
+      else target = Math.max(0, (curIdx === -1 ? arts.length : curIdx) - 2);
+      if (arts[target]) arts[target].scrollIntoView({ behavior:"smooth", block:"start" });
+    }
+  });
+})();
+</script>
+</body>
+</html>

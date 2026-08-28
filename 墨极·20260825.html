@@ -1,0 +1,754 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>墨极 MOJI · 2026-08-25 日报</title>
+<meta name="description" content="墨极 · 机器手书的每日新闻。黑白两色，不着一彩，原文可溯。">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'><rect width='64' height='64' rx='10' fill='%23b0392e'/><rect x='15' y='15' width='34' height='34' fill='none' stroke='%23f5f2ec' stroke-width='5'/></svg>">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Ma+Shan+Zheng&family=Noto+Serif+SC:wght@400;600;700;900&display=swap" rel="stylesheet">
+<style>
+/* ============ 底色与变量（日读 / 夜读） ============ */
+:root {
+  --paper:#f5f2ec; --card:#faf7ee; --ink:#17140f;
+  --body-c:#45413a; --soft:#6f6858; --grey:#8a8578;
+  --red:#b0392e; --line:rgba(23,20,15,.16); --deep-bg:rgba(23,20,15,.05);
+}
+body.night {
+  --paper:#15110c; --card:#1d1812; --ink:#ece5d4;
+  --body-c:#b2a893; --soft:#9a8f7a; --grey:#7c7462;
+  --red:#d0483a; --line:rgba(236,229,212,.17); --deep-bg:rgba(236,229,212,.06);
+}
+
+* { box-sizing:border-box; margin:0; padding:0; }
+html { scroll-behavior:smooth; }
+body {
+  background:var(--paper); color:var(--ink);
+  font-family:"Noto Serif SC","Songti SC","SimSun",serif;
+  min-height:100vh;
+  transition:background .35s ease, color .35s ease;
+}
+::selection { background:var(--red); color:#f5f2ec; }
+a { color:inherit; }
+section[id], article[id] { scroll-margin-top:66px; }
+.wrap { max-width:1180px; margin:0 auto; padding-left:clamp(18px,4vw,44px); padding-right:clamp(18px,4vw,44px); }
+.num { font-family:Georgia,"Times New Roman",serif; }
+
+/* 顶部阅读进度墨线 */
+#progress { position:fixed; top:0; left:0; height:3px; width:0; background:var(--red); z-index:100; }
+
+/* ============ 顶栏（时辰钟 / 墨相） ============ */
+.topbar { background:var(--ink); color:var(--paper); font-size:11px; letter-spacing:.22em; }
+.topbar-in { display:flex; justify-content:space-between; align-items:center; gap:18px; padding:7px 0; flex-wrap:wrap; }
+.topbar-in > span { opacity:.85; white-space:nowrap; }
+.topbar .num { letter-spacing:.12em; }
+
+/* ============ 报头 ============ */
+.masthead { text-align:center; padding:clamp(26px,4.5vh,46px) 0 24px; border-bottom:3px double var(--ink); position:relative; overflow:hidden; }
+.masthead::before {
+  content:"墨"; position:absolute; left:50%; top:50%;
+  transform:translate(-50%,-54%);
+  font-family:"Ma Shan Zheng","Kaiti SC","KaiTi",serif;
+  font-size:min(30vw,300px); line-height:1;
+  color:var(--ink); opacity:.045;
+  pointer-events:none; user-select:none;
+}
+.masthead > * { position:relative; z-index:1; }
+.masthead h1 {
+  font-size:clamp(44px,7vw,76px); font-weight:900;
+  letter-spacing:.35em; text-indent:.35em; line-height:1.1;
+  display:inline-flex; align-items:flex-start;
+}
+.stamp {
+  font-family:"Ma Shan Zheng","Kaiti SC","KaiTi",serif;
+  width:.62em; height:.62em; margin-left:.18em;
+  background:var(--red); color:#f6f1e6;
+  display:inline-flex; align-items:center; justify-content:center;
+  font-size:.42em; font-weight:400; letter-spacing:0; text-indent:0;
+  border-radius:.08em; transform:rotate(-8deg) translateY(-.08em);
+  box-shadow:0 3px 10px rgba(176,57,46,.3);
+  user-select:none;
+}
+.masthead .sub { margin-top:14px; font-size:12px; letter-spacing:.42em; text-indent:.42em; color:var(--soft); }
+
+/* 日期带（含翻期） */
+.dateband {
+  display:grid; grid-template-columns:1fr auto 1fr; align-items:center; gap:12px;
+  padding:10px 2px; border-bottom:1px solid var(--line);
+  font-size:12px; letter-spacing:.15em; color:var(--soft);
+}
+.dateband .mid { text-align:center; }
+.dateband .right { text-align:right; letter-spacing:.2em; }
+.daynav { display:flex; gap:16px; }
+.right.daynav { justify-content:flex-end; }
+.day-link { text-decoration:none; letter-spacing:.12em; transition:color .2s ease; }
+.day-link:not(.disabled):hover { color:var(--red); }
+.day-link.disabled { opacity:.35; cursor:default; }
+
+/* ============ 频道导航（吸顶） ============ */
+.nav { position:sticky; top:0; z-index:60; background:var(--ink); color:var(--paper); }
+.nav-in { display:flex; align-items:stretch; justify-content:space-between; gap:16px; }
+.nav-links { display:flex; gap:clamp(16px,3vw,40px); overflow-x:auto; scrollbar-width:none; }
+.nav-links::-webkit-scrollbar { display:none; }
+.nav-links a {
+  color:var(--paper); opacity:.8; text-decoration:none;
+  font-size:13.5px; letter-spacing:.35em; white-space:nowrap;
+  padding:13px 2px 11px; border-bottom:2px solid transparent;
+  transition:opacity .25s ease, border-color .25s ease;
+}
+.nav-links a:hover { opacity:1; }
+.nav-links a.active { opacity:1; font-weight:700; border-color:var(--red); }
+.nav-extra { display:flex; align-items:center; }
+.night-btn {
+  display:flex; align-items:center; justify-content:center;
+  background:transparent; color:inherit; cursor:pointer;
+  border:1px solid rgba(245,242,236,.35); border-radius:999px;
+  padding:5px 9px; transition:all .25s ease; line-height:0;
+}
+.night-btn:hover { background:rgba(245,242,236,.12); border-color:rgba(245,242,236,.7); transform:scale(1.06); }
+/* 太极图标：黑白两色即昼夜 */
+.taiji-icon {
+  position:relative; display:block; width:26px; height:26px; border-radius:50%;
+  background:linear-gradient(90deg, var(--ink) 50%, var(--paper) 50%);
+  box-shadow:0 0 0 1.5px currentColor;
+  animation:taiji-spin 16s linear infinite;
+}
+.taiji-icon::before, .taiji-icon::after {
+  content:""; position:absolute; left:50%; transform:translateX(-50%);
+  width:50%; height:50%; border-radius:50%;
+}
+.taiji-icon::before { top:0; background:var(--paper); box-shadow:inset 0 0 0 1px var(--ink); }
+.taiji-icon::after  { bottom:0; background:var(--ink); }
+.tj-eye-b, .tj-eye-w {
+  position:absolute; left:50%; transform:translateX(-50%);
+  width:4.5px; height:4.5px; border-radius:50%;
+}
+.tj-eye-b { top:4px; background:var(--ink); }
+.tj-eye-w { bottom:4px; background:var(--paper); }
+@keyframes taiji-spin { to { transform:rotate(360deg); } }
+
+/* ============ 快讯滚动条 ============ */
+.ticker { display:flex; align-items:stretch; border-bottom:1px solid var(--line); background:var(--card); }
+.tick-label {
+  flex-shrink:0; background:var(--red); color:#f6f1e6;
+  font-size:11.5px; font-weight:900; letter-spacing:.4em; text-indent:.4em;
+  padding:11px 14px; display:flex; align-items:center;
+}
+.tick-clip { overflow:hidden; flex:1; display:flex; align-items:center; }
+.tick-track { display:flex; width:max-content; animation:tickmove 55s linear infinite; }
+.ticker:hover .tick-track { animation-play-state:paused; }
+@keyframes tickmove { to { transform:translateX(-50%); } }
+.tick-track a {
+  font-size:12.5px; color:var(--body-c); text-decoration:none;
+  letter-spacing:.08em; white-space:nowrap; padding:10px 0; margin-right:64px;
+}
+.tick-track a i { color:var(--red); font-style:normal; font-size:9px; margin-right:8px; vertical-align:2px; }
+.tick-track a:hover { color:var(--red); }
+
+/* ============ 头版：头条 + 要闻速览 ============ */
+.front { display:grid; grid-template-columns:minmax(0,1fr) 300px; gap:clamp(26px,4vw,52px); padding-top:clamp(24px,4vh,40px); }
+
+.hero { position:relative; padding-bottom:10px; }
+.wm {
+  position:absolute; right:0; top:0;
+  font-size:clamp(84px,9vw,150px); font-weight:900; line-height:.9;
+  color:var(--ink); opacity:.06;
+  pointer-events:none; user-select:none;
+}
+.meta {
+  display:flex; align-items:baseline; gap:12px; flex-wrap:wrap;
+  font-size:11.5px; color:var(--grey); letter-spacing:.14em; margin-bottom:12px;
+}
+.cat {
+  font-weight:900; font-size:11.5px;
+  color:var(--paper); background:var(--ink);
+  padding:3px 8px 3px 10px; letter-spacing:.28em;
+}
+.cat.hot, .cat.top { background:var(--red); }
+.time { letter-spacing:.08em; }
+.src { margin-left:auto; max-width:44%; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+.hero .hl {
+  font-size:clamp(28px,3.6vw,42px); font-weight:900; line-height:1.4;
+  letter-spacing:.01em; margin-bottom:14px; max-width:26ch;
+}
+.hero .hl a, .lead .hl a { color:inherit; text-decoration:none; }
+.hero .hl a:hover, .lead .hl a:hover,
+.card h3 a:hover { background:var(--ink); color:var(--paper); padding:2px 8px; margin-left:-8px; }
+.standfirst { font-size:clamp(15.5px,1.6vw,17px); line-height:2.1; color:var(--body-c); text-align:justify; max-width:62ch; }
+.foot { display:flex; align-items:baseline; gap:24px; margin-top:14px; flex-wrap:wrap; }
+.origin { color:var(--red); font-weight:700; font-size:12.5px; letter-spacing:.18em; text-decoration:none; }
+.origin:hover { text-decoration:underline; }
+.deep-toggle {
+  cursor:pointer; user-select:none;
+  font-size:12px; letter-spacing:.3em; color:var(--grey);
+  border-bottom:1px dashed var(--grey); padding-bottom:2px;
+}
+.deep-toggle:hover { color:var(--ink); border-color:var(--ink); }
+.deep {
+  display:none; margin-top:14px; padding:16px 20px;
+  background:var(--deep-bg); border-left:3px solid var(--red);
+  font-size:13.5px; line-height:2.05; color:var(--body-c);
+  text-align:justify; white-space:pre-wrap;
+}
+.deep.open { display:block; }
+
+/* 要闻速览侧栏 */
+.digest { border-left:1px solid var(--line); padding-left:clamp(20px,2.5vw,34px); }
+.digest-title {
+  display:flex; align-items:center; gap:10px;
+  font-size:13px; font-weight:900; letter-spacing:.45em; text-indent:.1em;
+  margin-bottom:6px;
+}
+.digest-title .sq { width:8px; height:8px; background:var(--red); flex-shrink:0; }
+.digest-item {
+  display:flex; gap:12px; align-items:baseline;
+  padding:13px 2px; border-bottom:1px dotted var(--line);
+  text-decoration:none;
+}
+.digest-item .num { color:var(--red); font-weight:700; font-size:15px; min-width:24px; }
+.digest-item .t { font-size:14px; font-weight:700; line-height:1.75; }
+.digest-item:hover .t { color:var(--red); }
+
+/* 栏头（频道与往期通用） */
+.ch-head {
+  display:flex; align-items:baseline; justify-content:space-between; gap:14px;
+  border-bottom:2px solid var(--ink); padding-bottom:10px;
+}
+.ch-head h2 { font-size:clamp(22px,2.6vw,30px); font-weight:900; letter-spacing:.32em; }
+.ch-seal {
+  display:inline-flex; width:20px; height:20px; align-items:center; justify-content:center;
+  background:var(--red); color:#f6f1e6; border-radius:3px;
+  font-family:"Ma Shan Zheng","Kaiti SC","KaiTi",serif; font-size:12px; font-weight:400;
+  transform:rotate(-6deg) translateY(-3px); margin-left:10px; letter-spacing:0; text-indent:0;
+}
+.ch-en { font-family:Georgia,"Times New Roman",serif; font-size:12px; color:var(--grey); letter-spacing:.22em; white-space:nowrap; }
+
+/* ============ 频道区块 ============ */
+.channel { margin-top:clamp(44px,7vh,66px); }
+.lead { position:relative; padding:clamp(22px,3.5vh,32px) 0 clamp(24px,3.5vh,34px); }
+.lead .hl { font-size:clamp(23px,2.7vw,33px); font-weight:900; line-height:1.45; margin-bottom:12px; max-width:32ch; }
+.lead .lead-p { font-size:15px; line-height:2; color:var(--body-c); text-align:justify; max-width:64ch; }
+.grid2 { display:grid; grid-template-columns:1fr 1fr; column-gap:clamp(30px,4.5vw,60px); }
+.card { border-top:1px solid var(--line); padding:22px 0 26px; position:relative; }
+.card h3 { font-size:clamp(18px,1.9vw,22px); font-weight:900; line-height:1.55; margin-bottom:10px; }
+.card h3 a { color:inherit; text-decoration:none; }
+.card p { font-size:13.5px; line-height:1.95; color:var(--body-c); text-align:justify; }
+.card .no { color:var(--red); font-weight:700; font-size:13px; }
+.article:target { animation:flash 1.8s ease; }
+@keyframes flash { 0% { background:rgba(176,57,46,.09); } 100% { background:transparent; } }
+
+/* ============ 往期回顾 ============ */
+.archive { margin-top:clamp(44px,7vh,66px); }
+.arch-grid { display:flex; flex-wrap:wrap; border-top:1px solid var(--line); border-left:1px solid var(--line); }
+.arch-item {
+  flex:1 1 220px; min-width:200px;
+  background:var(--paper); text-decoration:none;
+  padding:18px 20px 16px;
+  border-right:1px solid var(--line); border-bottom:1px solid var(--line);
+  transition:background .25s ease;
+}
+.arch-item:hover { background:var(--card); }
+.arch-date { display:block; font-size:clamp(20px,2vw,26px); font-weight:700; letter-spacing:.06em; }
+.arch-item:hover .arch-date { color:var(--red); }
+.arch-meta { display:block; margin-top:6px; font-size:11px; letter-spacing:.2em; color:var(--grey); }
+.arch-empty { padding:26px 20px; font-size:12px; letter-spacing:.3em; color:var(--grey); }
+
+/* ============ 报尾 ============ */
+.band { margin-top:clamp(60px,9vh,90px); background:var(--ink); color:var(--paper); padding:38px 0 44px; text-align:center; }
+.band .band-title { font-size:20px; font-weight:900; letter-spacing:.5em; text-indent:.5em; margin-bottom:12px; }
+.band p { letter-spacing:.4em; font-size:11px; opacity:.85; margin:7px 0; }
+.band .band-hint { opacity:.45; letter-spacing:.3em; }
+.band .stamp-mini {
+  display:inline-flex; width:22px; height:22px; align-items:center; justify-content:center;
+  background:var(--red); color:#f6f1e6; border-radius:4px;
+  font-family:"Ma Shan Zheng","Kaiti SC","KaiTi",serif; font-size:13px; font-weight:400;
+  transform:rotate(-8deg); letter-spacing:0; text-indent:0; vertical-align:-4px; margin-left:6px;
+}
+
+/* 回顶印章 */
+.seal-top {
+  position:fixed; right:26px; bottom:30px; z-index:80;
+  width:52px; height:52px; border:none; border-radius:8px;
+  background:var(--red); color:#f6f1e6; cursor:pointer;
+  font-family:"Ma Shan Zheng","Kaiti SC","KaiTi",serif; font-size:17px;
+  writing-mode:vertical-rl; letter-spacing:.2em; line-height:52px; text-align:center;
+  transform:rotate(-6deg) scale(.5); opacity:0; pointer-events:none;
+  transition:all .45s cubic-bezier(.34,1.4,.64,1);
+  box-shadow:0 6px 18px rgba(0,0,0,.28);
+}
+.seal-top.on { opacity:1; transform:rotate(-6deg) scale(1); pointer-events:auto; }
+.seal-top:hover { box-shadow:0 8px 24px rgba(176,57,46,.45); }
+
+/* 右缘竖排署名 */
+.side-mark {
+  position:fixed; right:clamp(8px,1.5vw,22px); top:50%;
+  transform:translateY(-50%) rotate(90deg); transform-origin:center;
+  font-size:10px; letter-spacing:.4em; color:var(--ink); opacity:.28;
+  white-space:nowrap; pointer-events:none; z-index:5;
+}
+
+/* ============ 响应式 ============ */
+@media (max-width:1060px) {
+  .front { grid-template-columns:1fr; }
+  .digest { border-left:none; border-top:2px solid var(--ink); padding:22px 0 0; margin-top:6px; }
+  .side-mark { display:none; }
+}
+@media (max-width:860px) {
+  .arch-item { flex-basis:45%; }
+  .wm { font-size:clamp(64px,14vw,100px); }
+}
+@media (max-width:680px) {
+  .grid2 { grid-template-columns:1fr; }
+  .arch-item { flex-basis:100%; }
+  .dateband { grid-template-columns:1fr; text-align:center; }
+  .dateband .mid, .dateband .right { text-align:center; }
+  .daynav { justify-content:center; }
+  .src { max-width:100%; }
+  .seal-top { right:16px; bottom:20px; }
+}
+@media (prefers-reduced-motion:reduce) {
+  html { scroll-behavior:auto; }
+  .tick-track { animation:none; }
+  .tick-clip { overflow-x:auto; }
+  .seal-top { transition:none; }
+  .taiji-icon { animation:none; }
+  .article:target { animation:none; }
+}
+</style>
+</head>
+<body>
+<div id="progress" aria-hidden="true"></div>
+
+<!-- 顶栏 -->
+<div class="topbar">
+  <div class="wrap topbar-in">
+    <span class="tb-left"><span class="num" id="clockTime">--:--</span>　<span id="clockHr">--</span></span>
+    <span class="tb-right">☀ 晴 · 墨色透亮</span>
+  </div>
+</div>
+
+<!-- 报头 -->
+<header class="masthead">
+  <div class="wrap">
+    <h1>墨极<span class="stamp">印</span></h1>
+    <p class="sub">机器手书 · 不着一彩 · 原文可溯</p>
+  </div>
+</header>
+<div class="wrap">
+  <div class="dateband">
+    <span class="left daynav"><a class="day-link num" href="墨极·20260824.html">← 08.24 前一日</a></span>
+    <span class="mid num">2026-08-25 星期二 · 第 237 期 · 12 条</span>
+    <span class="right daynav"><a class="day-link num" href="墨极·20260826.html">后一日 08.26 →</a></span>
+  </div>
+</div>
+
+<!-- 频道导航 -->
+<nav class="nav">
+  <div class="wrap nav-in">
+    <div class="nav-links">
+      <a href="#front" class="active">头条</a>
+      <a href="#sec-ai">科技</a>
+      <a href="#sec-robotics">机器人</a>
+      <a href="#sec-geopolitics">国际</a>
+      <a href="#sec-finance">财经</a>
+      <a href="#archive">往期</a>
+    </div>
+    <div class="nav-extra">
+      <button class="night-btn" id="nightBtn" title="夜读模式（快捷键 N）" aria-label="切换夜读模式"><span class="taiji-icon" aria-hidden="true"><span class="tj-eye-b"></span><span class="tj-eye-w"></span></span></button>
+    </div>
+  </div>
+</nav>
+
+<!-- 快讯 -->
+<div class="ticker" aria-label="快讯">
+  <span class="tick-label">快讯</span>
+  <div class="tick-clip">
+    <div class="tick-track">
+        <a href="#hero"><i>◆</i>美伊停火谈判传重大进展！据称双方就霍尔木兹自由通航达成共识，布油一度…</a>
+        <a href="#a2"><i>◆</i>OpenWorker 新版发布，内置网络安全智能体</a>
+        <a href="#a3"><i>◆</i>WeatherNext 预测气旋：提前五天预警五级飓风</a>
+        <a href="#a11"><i>◆</i>美国财政部扩大长期国债回购规模后,黄金和比特币成为替代资产,同时暴涨…</a>
+        <a href="#a4"><i>◆</i>Claude 记忆功能全面打通聊天与 Cowork，用户可逐条查看和…</a>
+        <a href="#a5"><i>◆</i>LangChain 与 Airbyte 集成：让数据摄取达到生产级就…</a>
+        <a href="#hero"><i>◆</i>美伊停火谈判传重大进展！据称双方就霍尔木兹自由通航达成共识，布油一度…</a>
+        <a href="#a2"><i>◆</i>OpenWorker 新版发布，内置网络安全智能体</a>
+        <a href="#a3"><i>◆</i>WeatherNext 预测气旋：提前五天预警五级飓风</a>
+        <a href="#a11"><i>◆</i>美国财政部扩大长期国债回购规模后,黄金和比特币成为替代资产,同时暴涨…</a>
+        <a href="#a4"><i>◆</i>Claude 记忆功能全面打通聊天与 Cowork，用户可逐条查看和…</a>
+        <a href="#a5"><i>◆</i>LangChain 与 Airbyte 集成：让数据摄取达到生产级就…</a>
+    </div>
+  </div>
+</div>
+
+<main class="wrap">
+
+  <!-- ===== 头版 ===== -->
+  <section id="front" class="front">
+    <div class="hero">
+      <span class="wm num" aria-hidden="true">01</span>
+      <div class="meta">
+        <span class="cat top">头条</span><span class="cat">国际</span>
+        <span class="time num">8月26日 07:09</span>
+        <span class="src">源 · Exa 搜索</span>
+      </div>
+      <h2 class="hl"><a href="https://finance.sina.com.cn/money/future/fmnews/2026-08-26/doc-inipqnsh2289338.shtml" target="_blank" rel="noopener">美伊停火谈判传重大进展！据称双方就霍尔木兹自由通航达成共识，布油一度跌6%</a></h2>
+      <p class="standfirst">据俄媒，巴基斯坦和伊朗的消息人士称，美伊已就停火协议条款达成共识，其中包括霍尔木兹海峡自由通航，双方预计未来几天公布相关消息，并根据此前由巴基斯坦斡旋达成的伊斯兰堡谅解备忘录，启动谈判及技术性会议。</p>
+      <div class="foot">
+        <a class="origin" href="https://finance.sina.com.cn/money/future/fmnews/2026-08-26/doc-inipqnsh2289338.shtml" target="_blank" rel="noopener">阅读原文 ↗</a>
+      <span class="deep-toggle">展墨 ▼</span>
+        <div class="deep">1. 停火共识初现：据俄媒援引巴伊消息人士，美伊已就停火协议条款达成共识，核心条款包括霍尔木兹海峡自由通航，预计数日内正式公布。
+2. 市场即时反应：消息传出后，布油一度暴跌6%，WTI跌幅超5%，显示市场正快速消化地缘风险溢价。
+3. 关键不确定性：消息源为匿名，美伊官方未确认；伊朗明确将海峡重开与美国履行“伊斯兰堡谅解备忘录”承诺挂钩，谈判仍存变数。</div>
+      </div>
+    </div>
+
+    <aside class="digest">
+      <p class="digest-title"><span class="sq"></span>要闻速览</p>
+      <a class="digest-item" href="#a2"><span class="num">02</span><span class="t">OpenWorker 新版发布，内置网络安全智能体</span></a>
+      <a class="digest-item" href="#a3"><span class="num">03</span><span class="t">WeatherNext 预测气旋：提前五天预警五级飓风</span></a>
+      <a class="digest-item" href="#a11"><span class="num">11</span><span class="t">美国财政部扩大长期国债回购规模后,黄金和比特币成为替代资产,…</span></a>
+      <a class="digest-item" href="#a4"><span class="num">04</span><span class="t">Claude 记忆功能全面打通聊天与 Cowork，用户可逐…</span></a>
+      <a class="digest-item" href="#a5"><span class="num">05</span><span class="t">LangChain 与 Airbyte 集成：让数据摄取达到…</span></a>
+    </aside>
+  </section>
+
+  <!-- ===== 科技 ===== -->
+  <section id="sec-ai" class="channel">
+    <div class="ch-head">
+      <h2>科技<span class="ch-seal">科</span></h2>
+      <span class="ch-en">TECH · 6 篇</span>
+    </div>
+    <article class="lead article" id="a2" data-num="2">
+      <span class="wm num" aria-hidden="true">02</span>
+      <div class="meta">
+        <span class="no num">02</span><span class="cat hot">科技</span>
+        <span class="time num">8月26日 02:16</span>
+        <span class="src">源 · X：Andrew Ng（DeepLearning.A</span>
+      </div>
+      <h2 class="hl"><a href="https://x.com/AndrewYNg/status/2092315079576555806" target="_blank" rel="noopener">OpenWorker 新版发布，内置网络安全智能体</a></h2>
+      <p class="lead-p">Andrew Ng 旗下开源智能体 OpenWorker 发布新版，强化安全工作流。</p>
+      <div class="foot">
+        <a class="origin" href="https://x.com/AndrewYNg/status/2092315079576555806" target="_blank" rel="noopener">阅读原文 ↗</a>
+      <span class="deep-toggle">展墨 ▼</span>
+        <div class="deep">OpenWorker 新版以“安全”为核心卖点，直击企业采用AI编码工具时的信任痛点。其完全开源的harness设计，允许安全团队进行底层审计，从源头消除“后门”疑虑；内置三类安全智能体（代码漏洞扫描、供应链注入检测、云配置核查），将安全能力从“被动建议”升级为“主动防御”。尤其支持本地运行开源权重模型，为处理敏感代码的企业提供了数据不出域的合规路径。
+1. 对AI编程赛道：OpenWorker此举将“安全可信”从加分项变为竞争门槛。企业客户在选择智能体时，审计透明度和数据本地化将成为与代码生成质量并列的决策要素，倒逼同类产品跟进安全架构设计。  
+2. 对安全行业：智能体从“开发辅助”延伸至“安全巡检”，可能替代部分传统SAST/SCA工具的基础功能，但更深远的意义在于让安全检测嵌入开发流程，推动“安全左移”从理念落地为默认配置。  </div>
+      </div>
+    </article>
+    <div class="grid2">
+      <article class="card article" id="a3" data-num="3">
+        <div class="meta">
+          <span class="no num">03</span><span class="cat hot">科技</span>
+          <span class="time num">8月25日 23:37</span>
+          <span class="src">源 · X：Google AI (@GoogleAI)</span>
+        </div>
+        <h3><a href="https://x.com/GoogleAI/status/2092275116503707733" target="_blank" rel="noopener">WeatherNext 预测气旋：提前五天预警五级飓风</a></h3>
+        <p>Google AI 发布 WeatherNext 气旋预测模型，可同时预测风暴路径、强度和规模，比现有系统多提供一整天的预警时间。</p>
+        <div class="foot">
+          <a class="origin" href="https://x.com/GoogleAI/status/2092275116503707733" target="_blank" rel="noopener">阅读原文 ↗</a>
+        <span class="deep-toggle">展墨 ▼</span>
+        <div class="deep">Google WeatherNext 以“路径-强度-规模”三维预测能力，将五级飓风预警窗口延长至5天，并在2025年实战中首次被官方机构采纳。其千次蒙特卡洛模拟+开源策略，标志着AI气象预测从实验室走向业务化，且具备可验证的可靠性。
+1. 应急管理范式变革：多出的24小时预警对沿海疏散、基础设施防护具有决定性意义，尤其对牙买加等小岛屿发展中国家，可显著降低生命财产损失。  
+2. 行业竞争加速：开源代码+权重将吸引全球气象机构、保险公司和能源企业二次开发，倒逼传统数值预报（如ECMWF）加速AI融合，形成“物理+数据”混合预测新赛道。  </div>
+        </div>
+      </article>
+      <article class="card article" id="a4" data-num="4">
+        <div class="meta">
+          <span class="no num">04</span><span class="cat">科技</span>
+          <span class="time num">8月25日 08:00</span>
+          <span class="src">源 · Claude：Blog（网页）</span>
+        </div>
+        <h3><a href="https://claude.com/blog/claudes-memory-works-everywhere-and-you-decide-whats-in-it" target="_blank" rel="noopener">Claude 记忆功能全面打通聊天与 Cowork，用户可逐条查看和编辑</a></h3>
+        <p>Claude 即日起将聊天与 Claude Cowork 的记忆统一，用户在任一场景对话时都能调用此前积累的上下文，减少重复解释。</p>
+        <div class="foot">
+          <a class="origin" href="https://claude.com/blog/claudes-memory-works-everywhere-and-you-decide-whats-in-it" target="_blank" rel="noopener">阅读原文 ↗</a>
+        <span class="deep-toggle">展墨 ▼</span>
+        <div class="deep">1. 记忆统一：Claude 将聊天与 Cowork 场景的记忆打通，实现跨场景上下文连续调用，显著降低用户重复解释成本。  
+2. 实时动态管理：记忆随对话实时更新，用户可在设置中按主题精细化查看、编辑或删除，增强可控性。  
+3. 隐私分级策略：敏感话题（健康、信仰）默认不存储，可手动开启；识别号、犯罪记录等永久排除，体现合规底线。</div>
+        </div>
+      </article>
+      <article class="card article" id="a5" data-num="5">
+        <div class="meta">
+          <span class="no num">05</span><span class="cat">科技</span>
+          <span class="time num">8月25日 08:00</span>
+          <span class="src">源 · LangChain：Blog（RSS）</span>
+        </div>
+        <h3><a href="https://www.langchain.com/blog/making-data-ingestion-production-ready-a-langchain-powered-airbyte-destination" target="_blank" rel="noopener">LangChain 与 Airbyte 集成：让数据摄取达到生产级就绪</a></h3>
+        <p>LangChain团队于2025年1月发布其年度回顾报告，总结了过去一年在AI应用开发框架领域的关键进展。</p>
+        <div class="foot">
+          <a class="origin" href="https://www.langchain.com/blog/making-data-ingestion-production-ready-a-langchain-powered-airbyte-destination" target="_blank" rel="noopener">阅读原文 ↗</a>
+        <span class="deep-toggle">展墨 ▼</span>
+        <div class="deep">LangChain年度报告揭示其已从开发框架进化为AI应用基础设施层。关键数据：下载量破亿、月活开发者50万+，验证了其市场主导地位。三大战略信号值得关注：一是LangGraph 1.0确立状态化多智能体工作流标准，与OpenAI、Anthropic深度集成显示其&quot;中立层&quot;定位；二是成立独立基金会，这是应对生态治理与商业化的关键动作；三是2025年Q2统一接口标准，直指当前AI工具链碎片化痛点。
+短期看，LangChain通过云厂商合作和2万企业级项目验证，加速企业AI落地，但需警惕框架锁定风险。中期维度，统一接口标准若落地，将重构AI应用开发生态——降低迁移成本的同时，可能挤压垂直型工具生存空间。基金会化运作是双刃剑：既缓解社区对商业化的担忧，又考验其治理能力。值得关注的是，LangChain正从&quot;开发便利性&quot;竞争转向&quot;生产级可靠性&quot;竞争，这对后发竞品构成更高壁垒。但多模态、流式处理仍是未完全攻克的硬骨头，实际落地效果待市场检验。</div>
+        </div>
+      </article>
+      <article class="card article" id="a6" data-num="6">
+        <div class="meta">
+          <span class="no num">06</span><span class="cat">科技</span>
+          <span class="time num">8月25日 08:00</span>
+          <span class="src">源 · OpenAI：官网动态（RSS · 排除企业/客户案</span>
+        </div>
+        <h3><a href="https://openai.com/index/introducing-admin-plugin" target="_blank" rel="noopener">OpenAI 推出 ChatGPT Work 和 Codex 的 Admin 插件</a></h3>
+        <p>OpenAI 为 ChatGPT Work 和 Codex 推出 Admin 插件，让管理员在单一对话中完成查看工作区活动、管理成员与权限、调整用量限制及审批支出请求等操作。</p>
+        <div class="foot">
+          <a class="origin" href="https://openai.com/index/introducing-admin-plugin" target="_blank" rel="noopener">阅读原文 ↗</a>
+        <span class="deep-toggle">展墨 ▼</span>
+        <div class="deep">OpenAI 推出面向企业级管理的 Admin 插件，将分散的管理操作（成员权限、用量监控、支出审批）整合至单一对话界面。其核心设计逻辑有三：一是权限边界严格收敛，插件不额外扩大访问范围，仅复用现有角色体系；二是流程自动化，通过 Slack/Teams 路由审批请求，减少跨平台切换成本；三是实效验证，内部 IT 团队已用该工作流解决约 45% 的工单，证明其可操作性。
+对企业客户： 降低 AI 工具的管理门槛，尤其利好无专职 IT 运维的中小团队。审批流嵌入协作工具，可显著缩短决策链路，但需注意“对话式管理”可能带来的审计追溯复杂度——所有操作记录需保留可导出日志，否则可能引发合规风险。
+对 OpenAI 生态： 此举是在“AI 即生产力工具”之外的“管理即服务”延伸，意在巩固企业市场份额，对抗微软 Copilot 等竞品的行政集成优势。通过插件化将管理能力轻量化输出，或预示未来更多企业级功能以“对话即界面”形式落地。</div>
+        </div>
+      </article>
+      <article class="card article" id="a7" data-num="7">
+        <div class="meta">
+          <span class="no num">07</span><span class="cat">科技</span>
+          <span class="time num">8月25日 08:00</span>
+          <span class="src">源 · OpenAI：官网动态（RSS · 排除企业/客户案</span>
+        </div>
+        <h3><a href="https://openai.com/index/disrupting-malicious-uses-of-ai-influence-campaign-russia" target="_blank" rel="noopener">OpenAI 封禁俄罗斯虚假影响力行动账号</a></h3>
+        <p>OpenAI于2025年5月发布多项模型与产品更新。</p>
+        <div class="foot">
+          <a class="origin" href="https://openai.com/index/disrupting-malicious-uses-of-ai-influence-campaign-russia" target="_blank" rel="noopener">阅读原文 ↗</a>
+        <span class="deep-toggle">展墨 ▼</span>
+        <div class="deep">OpenAI在5月密集推进“技术+生态+安全”三位一体战略。GPT-4o以多模态统一架构和成本优势确立竞争壁垒，Reddit、Stack Overflow、Axel Springer等合作则加速高质量数据闭环构建，周活3亿与GPT-5预告显示其商业化与研发节奏同步提速。安全委员会的成立则是对监管压力的主动回应，意在平衡创新速度与风险治理。  
+1. 行业格局重塑：GPT-4o将多模态交互响应压缩至毫秒级，且API成本减半，直接挤压中小AI厂商的生存空间，行业门槛进一步抬高。  
+2. 数据军备竞赛升级：与Reddit及Stack Overflow的合作表明，高质量、实时性数据成为模型能力差异化的核心要素，内容平台议价权显著提升，可能引发更多数据授权交易。  </div>
+        </div>
+      </article>
+    </div>
+  </section>
+  <!-- ===== 机器人 ===== -->
+  <section id="sec-robotics" class="channel">
+    <div class="ch-head">
+      <h2>机器人<span class="ch-seal">器</span></h2>
+      <span class="ch-en">ROBOTICS · 1 篇</span>
+    </div>
+    <div class="grid2">
+      <article class="card article" id="a8" data-num="8">
+        <div class="meta">
+          <span class="no num">08</span><span class="cat">机器人</span>
+          <span class="time num">8月25日 08:00</span>
+          <span class="src">源 · Exa 搜索</span>
+        </div>
+        <h3><a href="https://finance.sina.com.cn/jjxw/2026-08-25/doc-inippmeq1601807.shtml" target="_blank" rel="noopener">全自主推理首秀夺冠！千寻智能斩获世界机器人运动会一金一银</a></h3>
+        <p>原标题：全自主推理首秀夺冠！千寻智能斩获世界机器人运动会一金一银 来源：投资界综合 8 月 25 日，第二届世界人形机器人运动会迎来重磅赛果。</p>
+        <div class="foot">
+          <a class="origin" href="https://finance.sina.com.cn/jjxw/2026-08-25/doc-inippmeq1601807.shtml" target="_blank" rel="noopener">阅读原文 ↗</a>
+        <span class="deep-toggle">展墨 ▼</span>
+        <div class="deep">1. 千寻智能首次参加世界人形机器人运动会，凭100%模型自主推理获得办公场景冠军和餐饮场景亚军，成为全场唯一全自主推理参赛队伍。  
+2. 技术核心为Spirit v1.6具身基座模型，采用VLA与世界模型深度融合架构，实现跨场景复用，无需人工遥操或场景定制。  
+3. 赛事评价标准从“动作展示”转向“模型自主决策”，直接对标真实商用岗位，验证了通用具身大脑的产业化可行性。  </div>
+        </div>
+      </article>
+    </div>
+  </section>
+  <!-- ===== 国际 ===== -->
+  <section id="sec-geopolitics" class="channel">
+    <div class="ch-head">
+      <h2>国际<span class="ch-seal">国</span></h2>
+      <span class="ch-en">WORLD · 2 篇</span>
+    </div>
+    <div class="grid2">
+      <article class="card article" id="a9" data-num="9">
+        <div class="meta">
+          <span class="no num">09</span><span class="cat hot">国际</span>
+          <span class="time num">8月25日 08:00</span>
+          <span class="src">源 · Exa 搜索</span>
+        </div>
+        <h3><a href="https://cn.nytimes.com/world/20260825/trump-bessent-iran-economic-d-day/" target="_blank" rel="noopener">特朗普试图扼杀伊朗经济，而这取决于中国是否合作 - 纽约时报中文网</a></h3>
+        <p>特朗普试图扼杀伊朗经济，而这取决于中国是否合作 - 纽约时报中文网 在周一宣布“经济弃儿行动”时，特朗普政府表示，该行动将切断所有向德黑兰输送资金的交易。</p>
+        <div class="foot">
+          <a class="origin" href="https://cn.nytimes.com/world/20260825/trump-bessent-iran-economic-d-day/" target="_blank" rel="noopener">阅读原文 ↗</a>
+        <span class="deep-toggle">展墨 ▼</span>
+        <div class="deep">特朗普政府推出“经济弃儿行动”，试图通过全面切断伊朗资金流（涵盖数字交易、石油转运及黄金流动）实施经济绞杀，以弥补此前军事冒进的失败。该战略的核心矛盾在于：中国购买了伊朗超80%的石油出口，而贝森特刻意回避提及中国，反映出华盛顿既需北京配合又不敢直接对抗的两难处境。值得注意的是，此前“极限施压”成效有限，伊朗仍维持每日200-300万桶出口，且核材料未移出，政权在领导层更迭后依然运转。
+这一战略暴露了美国经济胁迫工具的边际效用递减。首先，次级制裁威胁将加剧全球能源市场波动，但中国拥有独立于SWIFT的结算体系和战略石油储备，具备规避能力，且北京与德黑兰的能源合作涉及“一带一路”地缘布局，不会轻易让步。其次，在习近平即将访美的敏感节点，此举可能反噬中美关系，迫使中国在经贸谈判中采取更强硬立场。最后，制裁升级将强化伊朗与中俄的“去美元化”协作，加速全球支付体系碎片化。本质上，这是美国在军事选项失效后的战略收缩，其成功与否已不取决于华盛顿的单边意志，而系于北京的地缘经济算盘——而后者显然没有配合美国“经济D日”的动机。</div>
+        </div>
+      </article>
+      <article class="card article" id="a10" data-num="10">
+        <div class="meta">
+          <span class="no num">10</span><span class="cat hot">国际</span>
+          <span class="time num">8月25日 08:00</span>
+          <span class="src">源 · Exa 搜索</span>
+        </div>
+        <h3><a href="https://www.news.cn/world/20260825/b19f00c8704a47cba7a8d6c962a74e06/c.html" target="_blank" rel="noopener">美国全面升级对伊制裁 伊朗：回应将比以往更加坚决-新华网</a></h3>
+        <p>Exa 搜索（Exa Labs）于2025年3月完成由Lightspeed Venture Partners领投的1700万美元A轮融资，累计融资额达2300万美元。</p>
+        <div class="foot">
+          <a class="origin" href="https://www.news.cn/world/20260825/b19f00c8704a47cba7a8d6c962a74e06/c.html" target="_blank" rel="noopener">阅读原文 ↗</a>
+        <span class="deep-toggle">展墨 ▼</span>
+        <div class="deep">此次美国对伊制裁升级，表面是极限施压政策的延续，实则直指伊朗经济命脉与地区影响力根基。美方意图通过切断伊朗石油出口与金融通道，迫使其在核谈判与代理人网络问题上让步。伊朗“比以往更坚决”的回应表态，预示其可能采取加速铀浓缩、强化对霍尔木兹海峡的威慑或扩大地区代理人行动等反制措施。
+短期看，此举将加剧中东地缘紧张局势，推升国际油价波动风险，并冲击全球供应链稳定预期。中期而言，制裁升级将倒逼伊朗进一步向中俄靠拢，深化去美元化合作，可能加速全球能源贸易结算体系的碎片化。对市场而言，需警惕避险情绪升温对黄金、美元等资产的短期提振，同时关注地缘溢价对能源板块的持续扰动。美伊博弈若失控，将显著抬升地区冲突概率，对全球风险资产构成系统性压力。</div>
+        </div>
+      </article>
+    </div>
+  </section>
+  <!-- ===== 财经 ===== -->
+  <section id="sec-finance" class="channel">
+    <div class="ch-head">
+      <h2>财经<span class="ch-seal">财</span></h2>
+      <span class="ch-en">MARKETS · 2 篇</span>
+    </div>
+    <div class="grid2">
+      <article class="card article" id="a11" data-num="11">
+        <div class="meta">
+          <span class="no num">11</span><span class="cat hot">财经</span>
+          <span class="time num">8月25日 16:03</span>
+          <span class="src">源 · Exa 搜索</span>
+        </div>
+        <h3><a href="https://www.mk.co.kr/cn/stock/12135928" target="_blank" rel="noopener">美国财政部扩大长期国债回购规模后,黄金和比特币成为替代资产,同时暴涨。 据分析,美国财政赤字扩大和美元流动性增加导致货币价值下降的忧虑刺激了所谓的&quot;Debasement Trade(货币价值毁损赌注)..</a></h3>
+        <p>美国财政部扩大长期国债回购规模后,黄金和比特币成为替代资产,同时暴涨。</p>
+        <div class="foot">
+          <a class="origin" href="https://www.mk.co.kr/cn/stock/12135928" target="_blank" rel="noopener">阅读原文 ↗</a>
+        <span class="deep-toggle">展墨 ▼</span>
+        <div class="deep">美国财政部扩大长期国债回购规模，本质是通过增加美元流动性来稳定长端利率。这一政策直接触发了“货币贬值交易”（Debasement Trade）——市场对财政赤字货币化及美元购买力下降的担忧升温，资金转向供给有限的硬资产。黄金期货自低点反弹超18%，比特币逼近8万美元，两者罕见同步走强，凸显避险逻辑已从传统安全资产外溢至加密资产。
+1. 资产定价逻辑重构：实际利率下行降低了持有零息资产的机会成本，同时美元流动性泛滥加剧信用货币贬值预期。黄金与比特币的同步上涨，表明市场正将两者共同视为“去法币化”的对冲工具，这一定位转变可能强化其长期配置价值。
+2. 政策传导风险：财政部回购操作虽短期稳定债市，但实质是财政与货币政策的边界模糊化。若赤字扩张持续，美联储独立性将面临更大考验，通胀预期可能重新抬头，进而倒逼货币政策转向，形成“流动性宽松-资产涨价-通胀黏性”的政策困局。</div>
+        </div>
+      </article>
+      <article class="card article" id="a12" data-num="12">
+        <div class="meta">
+          <span class="no num">12</span><span class="cat">财经</span>
+          <span class="time num">8月25日 08:00</span>
+          <span class="src">源 · Exa 搜索</span>
+        </div>
+        <h3><a href="https://finance.sina.com.cn/money/forex/hbfx/2026-08-25/doc-inipnyqs9664601.shtml" target="_blank" rel="noopener">美债收益率飙升+财政部干预市场，沃什杰克逊霍尔首秀能挽回市场信心吗？</a></h3>
+        <p>美债收益率飙升+财政部干预市场，沃什杰克逊霍尔首秀能挽回市场信心吗？</p>
+        <div class="foot">
+          <a class="origin" href="https://finance.sina.com.cn/money/forex/hbfx/2026-08-25/doc-inipnyqs9664601.shtml" target="_blank" rel="noopener">阅读原文 ↗</a>
+        <span class="deep-toggle">展墨 ▼</span>
+        <div class="deep">1. 政策独立性承压：美联储主席沃什面临双重约束——既要应对财政部积极干预长期利率带来的市场扭曲，又需在国会与白宫的政治压力下维护央行信誉。其杰克逊霍尔首秀被市场视为政策透明度的试金石。
+2. 通胀与加息困境：美国通胀高于2%目标已超五年，市场已定价9月加息概率回落至35%，但FOMC内部对推迟加息的长期成本存在分歧。沃什提出的&quot;让市场形成收益率曲线&quot;论点，与财政部压低长端利率的操作直接冲突。
+3. 市场信心临界点：美元指数徘徊于99附近，处于5月中旬以来低位，反映市场对美联储政策公信力的定价已趋谨慎。沃什若未能提供清晰政策路径，美元可能跌破98关口。</div>
+        </div>
+      </article>
+    </div>
+  </section>
+</main>
+
+<!-- ===== 往期回顾 ===== -->
+<section id="archive" class="archive wrap">
+  <div class="ch-head">
+    <h2>往期回顾<span class="ch-seal">档</span></h2>
+    <span class="ch-en">ARCHIVE</span>
+  </div>
+  <div class="arch-grid">
+    <a class="arch-item" href="墨极·20260827.html"><span class="arch-date num">08.27</span><span class="arch-meta">2026 · 星期四 · 12 条</span></a>
+    <a class="arch-item" href="墨极·20260826.html"><span class="arch-date num">08.26</span><span class="arch-meta">2026 · 星期三 · 8 条</span></a>
+    <a class="arch-item" href="墨极·20260824.html"><span class="arch-date num">08.24</span><span class="arch-meta">2026 · 星期一 · 9 条</span></a>
+    <a class="arch-item" href="墨极·20260823.html"><span class="arch-date num">08.23</span><span class="arch-meta">2026 · 星期日 · 10 条</span></a>
+    <a class="arch-item" href="墨极·20260822.html"><span class="arch-date num">08.22</span><span class="arch-meta">2026 · 星期六 · 11 条</span></a>
+    <a class="arch-item" href="墨极·20260821.html"><span class="arch-date num">08.21</span><span class="arch-meta">2026 · 星期五 · 12 条</span></a>
+  </div>
+</section>
+
+<!-- 报尾 -->
+<footer class="band">
+  <div class="wrap">
+    <p class="band-title">墨极<span class="stamp-mini">印</span></p>
+    <p>机器手书 · 旁注皆机器所拟 · 原文可溯</p>
+    <p>距明日 09:00 报讯 · <span class="num" id="cdNum2">--:--:--</span></p>
+    <p class="band-hint num">J / K 换条 · T 回顶 · N 夜读</p>
+  </div>
+</footer>
+
+<button class="seal-top" id="sealTop" title="回到卷首">回顶</button>
+<span class="side-mark">MOJI DAILY · 墨极编辑部 · 原文可溯</span>
+
+<script>
+(function(){
+  var body = document.body;
+
+  /* 夜读模式（记忆偏好） */
+  try { if (localStorage.getItem("moji-night") === "1") body.classList.add("night"); } catch(e) {}
+  function toggleNight(){
+    body.classList.toggle("night");
+    try { localStorage.setItem("moji-night", body.classList.contains("night") ? "1" : "0"); } catch(e) {}
+  }
+  document.getElementById("nightBtn").addEventListener("click", toggleNight);
+
+  /* 展墨 / 收墨 */
+  document.addEventListener("click", function(e){
+    var t = e.target;
+    if (t.classList && t.classList.contains("deep-toggle")) {
+      var art = t.closest("article") || t.closest(".hero");
+      var d = art && art.querySelector(".deep");
+      if (d) {
+        d.classList.toggle("open");
+        t.textContent = d.classList.contains("open") ? "收墨 ▲" : "展墨 ▼";
+      }
+    }
+  });
+
+  /* 时辰钟 */
+  var HRS = ["子时","丑时","寅时","卯时","辰时","巳时","午时","未时","申时","酉时","戌时","亥时"];
+  function tickClock(){
+    var n = new Date();
+    var hh = String(n.getHours()).padStart(2,"0");
+    var mm = String(n.getMinutes()).padStart(2,"0");
+    document.getElementById("clockTime").textContent = hh + ":" + mm;
+    document.getElementById("clockHr").textContent = HRS[Math.floor(((n.getHours()+1)%24)/2)];
+  }
+  tickClock(); setInterval(tickClock, 15000);
+
+  /* 距明日报讯（09:00）倒计时 */
+  function tickCountdown(){
+    var now = new Date();
+    var next = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 9, 0, 0);
+    if (now.getHours() >= 9) next = new Date(now.getFullYear(), now.getMonth(), now.getDate()+1, 9, 0, 0);
+    var diff = Math.max(0, next - now);
+    var h = String(Math.floor(diff/3600000)).padStart(2,"0");
+    var m = String(Math.floor(diff%3600000/60000)).padStart(2,"0");
+    var s = String(Math.floor(diff%60000/1000)).padStart(2,"0");
+    document.getElementById("cdNum2").textContent = h + ":" + m + ":" + s;
+  }
+  tickCountdown(); setInterval(tickCountdown, 1000);
+
+  /* 阅读进度 + 导航高亮 + 回顶印章 */
+  var bar = document.getElementById("progress");
+  var seal = document.getElementById("sealTop");
+  var arts = Array.prototype.slice.call(document.querySelectorAll("article[data-num]"));
+  var navLinks = Array.prototype.slice.call(document.querySelectorAll(".nav-links a"));
+  var SPY = ["front","sec-ai","sec-robotics","sec-geopolitics","sec-finance","sec-other","archive"];
+
+  function onScroll(){
+    var docH = document.documentElement.scrollHeight - window.innerHeight;
+    var pct = Math.min(100, Math.max(0, Math.round(window.scrollY / (docH || 1) * 100)));
+    bar.style.width = pct + "%";
+
+    var cur = SPY[0];
+    SPY.forEach(function(id){
+      var el = document.getElementById(id);
+      if (el && el.getBoundingClientRect().top < window.innerHeight * 0.42) cur = id;
+    });
+    navLinks.forEach(function(a){ a.classList.toggle("active", a.getAttribute("href") === "#" + cur); });
+
+    seal.classList.toggle("on", window.scrollY > window.innerHeight * 0.9);
+  }
+  window.addEventListener("scroll", onScroll, { passive:true });
+  onScroll();
+  seal.addEventListener("click", function(){ window.scrollTo({ top:0, behavior:"smooth" }); });
+
+  /* 键盘导航：J/K 换条 · T 回顶 · N 夜读 */
+  document.addEventListener("keydown", function(e){
+    if (e.target.tagName === "INPUT" || e.target.tagName === "TEXTAREA") return;
+    var k = e.key.toLowerCase();
+    if (k === "t") {
+      window.scrollTo({ top:0, behavior:"smooth" });
+    } else if (k === "n") {
+      toggleNight();
+    } else if (k === "j" || k === "k") {
+      var curIdx = -1;
+      arts.forEach(function(a, i){
+        if (curIdx === -1 && a.getBoundingClientRect().top > 70) curIdx = i;
+      });
+      var target;
+      if (k === "j") target = Math.max(0, curIdx === -1 ? arts.length - 1 : curIdx);
+      else target = Math.max(0, (curIdx === -1 ? arts.length : curIdx) - 2);
+      if (arts[target]) arts[target].scrollIntoView({ behavior:"smooth", block:"start" });
+    }
+  });
+})();
+</script>
+</body>
+</html>
