@@ -1,0 +1,93 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>方案预览 · 个人网站</title>
+<style>
+  :root{--ink:#1a1a1a;--bg:#fafafa;--line:#e3e3e3;--acc:#c0472f}
+  *{margin:0;padding:0;box-sizing:border-box}
+  body{
+    font-family:"Microsoft YaHei","PingFang SC",sans-serif;
+    background:var(--bg);color:var(--ink);line-height:1.8;padding:8vh 6vw;
+    max-width:1000px;margin:0 auto;
+  }
+  header{margin-bottom:5vh}
+  h1{font-size:clamp(1.6rem,4vw,2.4rem);letter-spacing:.1em}
+  header p{color:#666;margin-top:.6rem;font-size:.95rem}
+  .list{border-top:2px solid var(--ink)}
+  a.card{
+    display:grid;grid-template-columns:auto 1fr auto;gap:1.6rem;align-items:center;
+    padding:2rem .6rem;border-bottom:1px solid var(--line);text-decoration:none;color:inherit;
+    transition:.2s;
+  }
+  a.card:hover{background:#fff;padding-left:1.2rem}
+  .card .idx{
+    font-size:2rem;font-weight:900;color:transparent;-webkit-text-stroke:1.6px var(--ink);
+    font-family:Consolas,monospace;
+  }
+  .card h2{font-size:1.25rem;letter-spacing:.06em}
+  .card h2 small{color:#999;font-weight:400;font-size:.75rem;letter-spacing:.2em;margin-left:.8em}
+  .card p{color:#666;font-size:.9rem;margin-top:.3rem}
+  .card .tags{margin-top:.5rem;font-size:.75rem;color:var(--acc);letter-spacing:.1em}
+  .card .go{
+    font-size:.85rem;color:var(--acc);letter-spacing:.2em;white-space:nowrap;
+    border:1px solid var(--acc);padding:.4em 1em;border-radius:2em;transition:.2s;
+  }
+  a.card:hover .go{background:var(--acc);color:#fff}
+  footer{margin-top:4rem;font-size:.8rem;color:#999;letter-spacing:.1em}
+</style>
+</head>
+<body>
+
+<header>
+  <h1>四个原创方案，先看后挑</h1>
+  <p>每个方案都是独立的单个 HTML 文件：双击即开，无需联网，无任何依赖。选中哪个，我们再往深处打磨。</p>
+</header>
+
+<nav class="list">
+  <a class="card" href="03-wuti.html">
+    <span class="idx">01</span>
+    <span>
+      <h2>无题<small>UNTITLED</small></h2>
+      <p>不要标题的方案：开场只有一个巨大的句号和一枚闪烁的光标，粗黑骨架、现场时钟、跑马灯与排队编号机。</p>
+      <p class="tags">#极简 #粗黑大字 #现场时钟 #排队编号</p>
+    </span>
+    <span class="go">打开 →</span>
+  </a>
+
+  <a class="card" href="04-ribao.html">
+    <span class="idx">02</span>
+    <span>
+      <h2>攀攀日报<small>PANPAN DAILY</small></h2>
+      <p>把自己办成一份对开报纸：报头、头条、简讯、分类广告、填字游戏一应俱全，期数按当天日期自动计算。</p>
+      <p class="tags">#报纸版式 #头条 #简讯 #填字游戏</p>
+    </span>
+    <span class="go">打开 →</span>
+  </a>
+
+  <a class="card" href="06-liubai.html">
+    <span class="idx">03</span>
+    <span>
+      <h2>留白<small>WHITESPACE</small></h2>
+      <p>极简里的极简：一屏只有一句话，大段留白，滚动时渐显，顶部一根发丝进度线，右侧几粒小圆点导航。安静的人做的安静页面。</p>
+      <p class="tags">#一屏一句 #大留白 #渐显 #极静</p>
+    </span>
+    <span class="go">打开 →</span>
+  </a>
+
+  <a class="card" href="08-xian.html">
+    <span class="idx">04</span>
+    <span>
+      <h2>线<small>LINE WORK</small></h2>
+      <p>多线成山：开场由四十多根横线错峰生长出一座山，全页铺横向发丝底纹，章节用粗细双线分节，联系卡悬停时以斜线肌理填充，页脚实时清点在场线数。</p>
+      <p class="tags">#多线条 #线群成山 #发丝底纹 #斜线肌理</p>
+    </span>
+    <span class="go">打开 →</span>
+  </a>
+</nav>
+
+<footer>四个方案均为此刻从零手写：无模板、无框架、无外部资源、无一行抄录。</footer>
+
+</body>
+</html>

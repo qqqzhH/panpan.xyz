@@ -1,0 +1,167 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>攀攀 · 留白</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'><rect width='64' height='64' fill='%23fafaf8'/><circle cx='32' cy='32' r='13' fill='none' stroke='%23191919' stroke-width='5'/></svg>">
+<style>
+  :root{
+    --bg:#fafaf8;
+    --ink:#191919;
+    --body:#3c3c38;
+    --gray:#8a8a85;
+    --hair:#e4e4df;
+  }
+  *{margin:0;padding:0;box-sizing:border-box}
+  html{scroll-behavior:smooth}
+  body{
+    background:var(--bg);color:var(--ink);
+    font-family:"Source Han Serif SC","Noto Serif SC","SimSun","STSong",serif;
+    line-height:2.2;overflow-x:hidden;
+  }
+  ::selection{background:var(--ink);color:var(--bg)}
+
+  /* 顶部发丝进度线 */
+  #bar{position:fixed;top:0;left:0;height:1px;width:0;background:var(--ink);z-index:20}
+
+  /* 右侧圆点导航 */
+  nav{position:fixed;right:28px;top:50%;transform:translateY(-50%);display:flex;flex-direction:column;gap:20px;z-index:20}
+  nav a{width:5px;height:5px;border-radius:50%;background:var(--gray);opacity:.4;transition:.35s}
+  nav a:hover,nav a.on{opacity:1;background:var(--ink);transform:scale(1.5)}
+
+  /* 章节：一屏一句，滚动渐显 */
+  section{
+    min-height:100vh;
+    display:flex;flex-direction:column;justify-content:center;align-items:center;
+    text-align:center;padding:0 9vw;
+    opacity:0;transform:translateY(16px);
+    transition:opacity 1.1s ease,transform 1.1s ease;
+  }
+  section.in{opacity:1;transform:none}
+  .no{font-size:12px;letter-spacing:.55em;text-indent:.55em;color:var(--gray);margin-bottom:2.4rem}
+  section h2{font-size:1rem;font-weight:400;letter-spacing:.6em;text-indent:.6em;margin-bottom:2.6rem}
+  section p{max-width:23em;color:var(--body);font-size:.95rem;text-align:center}
+
+  .hero .name{
+    font-size:clamp(1.5rem,4vw,2.1rem);font-weight:400;
+    letter-spacing:1.1em;text-indent:1.1em;margin-bottom:1.8rem;
+  }
+  .hero p{color:var(--gray)}
+  .cue{
+    width:1px;height:64px;margin-top:3.4rem;
+    background:linear-gradient(var(--ink),transparent);
+    animation:cue 2.8s ease-in-out infinite;
+  }
+  @keyframes cue{0%,100%{opacity:.15}50%{opacity:.85}}
+
+  ul{list-style:none;text-align:left}
+  li{margin:1rem 0;color:var(--body);font-size:.95rem;display:flex;gap:1.1em;align-items:baseline}
+  li::before{content:"—";color:var(--gray);flex:none}
+  li em{font-style:normal;color:var(--gray);font-size:.82rem;margin-left:.2em;white-space:nowrap}
+
+  .mail{
+    color:var(--ink);text-decoration:none;letter-spacing:.08em;
+    border-bottom:1px solid var(--gray);padding-bottom:2px;transition:.3s;white-space:nowrap;
+  }
+  .mail:hover{border-color:var(--ink)}
+
+  footer{
+    padding:4.5rem 0 3.6rem;text-align:center;
+    color:var(--gray);font-size:.75rem;letter-spacing:.28em;line-height:2.4;
+  }
+
+  @media (max-width:640px){
+    nav{display:none}
+    section{min-height:86vh}
+  }
+  @media (prefers-reduced-motion:reduce){
+    section{transition:none;opacity:1;transform:none}
+    .cue{animation:none}
+  }
+</style>
+</head>
+<body>
+
+<div id="bar" aria-hidden="true"></div>
+
+<nav aria-label="章节">
+  <a href="#top" title="卷首"></a>
+  <a href="#s1" title="关于"></a>
+  <a href="#s2" title="在做"></a>
+  <a href="#s3" title="找我"></a>
+</nav>
+
+<main>
+  <section class="hero" id="top">
+    <p class="name">攀攀</p>
+    <p>这里什么都没有，所以什么都有可能。</p>
+    <div class="cue" aria-hidden="true"></div>
+  </section>
+
+  <section id="s1">
+    <p class="no">壹</p>
+    <h2>关于</h2>
+    <p>删掉了所有能删的东西，剩下的就是我了——一个把「少」当爱好的人。话不多，页面也如此。你现在看到的这些空白，都是我亲自留的。</p>
+  </section>
+
+  <section id="s2">
+    <p class="no">贰</p>
+    <h2>在做</h2>
+    <ul>
+      <li><span>把一件事做完</span><em>进行中 · 多年</em></li>
+      <li><span>学习适可而止</span><em>尚未开始</em></li>
+      <li><span>练习安静</span><em>小有所成</em></li>
+    </ul>
+  </section>
+
+  <section id="s3">
+    <p class="no">叁</p>
+    <h2>找我</h2>
+    <p>如果想说话，写信给我。安静的人回信都很快。</p>
+    <p style="margin-top:1.6rem"><a class="mail" href="mailto:you@example.com">you@example.com</a></p>
+  </section>
+</main>
+
+<footer>
+  攀攀 · 留白<br>
+  本页一半是内容，一半是留白——两者同样重要
+</footer>
+
+<script>
+(function(){
+  /* 发丝进度线 */
+  var bar = document.getElementById('bar');
+  function up(){
+    var max = Math.max(1, document.documentElement.scrollHeight - window.innerHeight);
+    var p = Math.min(1, Math.max(0, window.pageYOffset / max));
+    bar.style.width = (p * 100) + '%';
+  }
+  var ticking = false;
+  window.addEventListener('scroll', function(){
+    if (!ticking) {
+      ticking = true;
+      requestAnimationFrame(function(){ up(); ticking = false; });
+    }
+  }, { passive: true });
+  up();
+
+  /* 渐显 + 导航点亮 */
+  var links = document.querySelectorAll('nav a');
+  var secs = document.querySelectorAll('main section');
+  function light(id){
+    links.forEach(function(a){ a.classList.toggle('on', a.getAttribute('href') === '#' + id); });
+  }
+  var io = new IntersectionObserver(function(es){
+    es.forEach(function(e){
+      if (e.isIntersecting) {
+        e.target.classList.add('in');
+        light(e.target.id);
+      }
+    });
+  }, { threshold: 0.35 });
+  secs.forEach(function(s){ io.observe(s); });
+})();
+</script>
+</body>
+</html>

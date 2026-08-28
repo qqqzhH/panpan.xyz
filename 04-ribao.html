@@ -1,0 +1,222 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>攀攀日报</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'><rect width='64' height='64' fill='%23201c16'/><g stroke='%23f8f5ed' stroke-width='5' stroke-linecap='round'><line x1='14' y1='20' x2='50' y2='20'/><line x1='14' y1='32' x2='50' y2='32'/><line x1='14' y1='44' x2='38' y2='44'/></g></svg>">
+<style>
+  :root{
+    --paper:#f8f5ed;
+    --ink:#201c16;
+    --soft:#5c554a;
+    --rule:#201c16;
+    --red:#a83a2a;
+  }
+  *{margin:0;padding:0;box-sizing:border-box}
+  body{
+    font-family:"SimSun","Songti SC","Noto Serif SC",serif;
+    background:#e8e4d8;color:var(--ink);line-height:1.9;
+  }
+  ::selection{background:var(--red);color:var(--paper)}
+  a{color:inherit}
+
+  .sheet{
+    max-width:1080px;margin:26px auto;background:var(--paper);
+    padding:34px 42px 46px;position:relative;
+    box-shadow:0 12px 40px rgba(32,28,22,.18);
+  }
+
+  /* ---------- 报头 ---------- */
+  .topline{
+    display:flex;justify-content:space-between;gap:1rem;flex-wrap:wrap;
+    font-size:12px;letter-spacing:.12em;color:var(--soft);
+    border-bottom:1px solid var(--rule);padding-bottom:6px;
+  }
+  .masthead h1{
+    text-align:center;font-size:clamp(3rem,9vw,5.6rem);font-weight:900;
+    letter-spacing:.18em;line-height:1.25;padding:14px 0 10px;
+    font-family:"SimHei","Source Han Sans SC","Microsoft YaHei",sans-serif;
+  }
+  .subline{
+    display:flex;justify-content:space-between;gap:1rem;flex-wrap:wrap;
+    font-size:12.5px;letter-spacing:.14em;
+    border-top:3px double var(--rule);border-bottom:3px double var(--rule);
+    padding:6px 2px;
+  }
+  .subline b{color:var(--red)}
+
+  /* ---------- 版面 ---------- */
+  .layout{
+    display:grid;grid-template-columns:2.3fr 1fr;gap:34px;
+    padding-top:26px;
+  }
+  .lead h2{
+    font-size:clamp(1.7rem,4vw,2.6rem);font-weight:900;line-height:1.5;
+    text-align:center;letter-spacing:.04em;
+    font-family:"SimHei","Source Han Sans SC","Microsoft YaHei",sans-serif;
+  }
+  .lead .dek{text-align:center;color:var(--soft);margin:.9rem 0 .2rem;font-size:.98rem}
+  .lead .byline{
+    text-align:center;font-size:12.5px;letter-spacing:.2em;
+    border-top:1px solid var(--rule);border-bottom:1px solid var(--rule);
+    margin:1rem auto .4rem;padding:5px 0;width:60%;min-width:280px;
+  }
+  .lead figure{
+    border:1px solid var(--rule);margin:1.4rem 0;padding:1.6rem 1.4rem;
+    text-align:center;background:#f3eee1;
+  }
+  .lead figure .art{
+    font-size:4.2rem;line-height:1.2;letter-spacing:.1em;color:var(--red);
+    font-family:"SimHei","Microsoft YaHei",sans-serif;
+  }
+  .lead figcaption{font-size:12px;color:var(--soft);margin-top:.6rem;letter-spacing:.15em}
+  .cols{columns:2;column-gap:34px;column-rule:1px solid rgba(32,28,22,.28)}
+  .cols p{text-align:justify;text-indent:2em;margin-bottom:.9em;font-size:.97rem}
+  .cols p:first-child::first-letter{
+    font-size:3.1em;float:left;line-height:1;padding:.04em .12em 0 0;
+    font-weight:900;color:var(--red);
+  }
+
+  /* ---------- 边栏 ---------- */
+  aside{border-left:1px solid rgba(32,28,22,.28);padding-left:30px}
+  aside h3{
+    font-size:1.05rem;letter-spacing:.3em;text-align:center;
+    border-top:3px double var(--rule);border-bottom:3px double var(--rule);
+    padding:5px 0;margin-bottom:1rem;
+    font-family:"SimHei","Microsoft YaHei",sans-serif;
+  }
+  aside .box{margin-bottom:2rem}
+  .news{list-style:none}
+  .news li{
+    border-bottom:1px dashed rgba(32,28,22,.35);padding:.75em 0;
+    font-size:.9rem;text-align:justify;
+  }
+  .news time{color:var(--red);font-size:.78rem;letter-spacing:.06em;display:block}
+
+  .ad{background:#f3eee1;border:1px solid var(--rule);padding:1rem 1.1rem;font-size:.88rem}
+  .ad h3{border:none;padding:0;margin-bottom:.4rem;font-size:.95rem}
+  .ad p{text-align:justify;margin-bottom:.5em}
+
+  /* 迷你填字 */
+  .cross{
+    display:grid;grid-template-columns:repeat(7,26px);grid-auto-rows:26px;
+    margin:0 auto;width:max-content;border:2px solid var(--rule);
+  }
+  .cross i{border:.5px solid rgba(32,28,22,.55);display:grid;place-items:center;font-style:normal;font-size:14px}
+  .cross i.b{background:var(--ink)}
+
+  /* ---------- 报尾 ---------- */
+  .colophon{
+    margin-top:34px;border-top:3px double var(--rule);padding-top:14px;
+    display:flex;justify-content:space-between;align-items:center;gap:2rem;flex-wrap:wrap;
+    font-size:12px;letter-spacing:.15em;color:var(--soft);position:relative;
+  }
+  .stamp{
+    position:absolute;right:12%;top:-14px;transform:rotate(-9deg);
+    border:3px solid var(--red);color:var(--red);border-radius:8px;
+    padding:.15em .5em;font-size:1.25rem;letter-spacing:.3em;
+    font-family:"SimHei","Microsoft YaHei",sans-serif;opacity:.85;
+  }
+
+  @media (max-width:860px){
+    .layout{grid-template-columns:1fr}
+    aside{border-left:none;padding-left:0}
+    .cols{columns:1}
+    .sheet{margin:0;padding:22px 20px 34px}
+  }
+</style>
+</head>
+<body>
+
+<div class="sheet">
+
+  <header class="masthead">
+    <div class="topline">
+      <span>创刊于一个平常的下午</span>
+      <span id="date">2026年8月28日 星期五</span>
+      <span>晴 · 微风二级 · 宜敲键盘</span>
+    </div>
+    <h1>攀攀日报</h1>
+    <div class="subline">
+      <span>PANPAN DAILY</span>
+      <span id="qi">第 240 期</span>
+      <span>本版编辑：<b>攀攀</b> · 一人报社</span>
+    </div>
+  </header>
+
+  <main class="layout">
+    <article class="lead">
+      <h2>本报记者查明：所谓生活，大多是自己排版的</h2>
+      <p class="dek">——一位不愿透露姓名的攀攀先生，在本报创刊号上同时出任社长、主编、排版工与送报员</p>
+      <p class="byline">本报记者 攀攀 报道</p>
+
+      <figure>
+        <div class="art">攀攀日报</div>
+        <figcaption>本报报头 · 手工排印 · 未经任何模板之手</figcaption>
+      </figure>
+
+      <div class="cols">
+        <p>本报讯，一个人决定把自己办成一份报纸，理由说出来很简单：朋友圈像传单，社交平台像电线杆，都贴得太满、撕得太快。他想有个地方，能把日子按栏目归档，把废话排进中缝，把值得留住的事放上头版。</p>
+        <p>经过长达一顿饭的筹备，本报于今日付印。发行范围为全宇宙，定价为零，广告永久招商但永不招揽。印刷方式为浏览器一张，油墨若干（电子的）。</p>
+        <p>本报 editorial 方针只有一条：原创。不转载、不洗稿、不借鉴。若发现本报刊登了与你相似的人生，那纯属我们活在了同一个时代。</p>
+        <p>以下是正事：这里将不定期刊登主笔的近况、正在做的东西、以及一些不构成任何建议的想法。订阅方式为「顺便路过」，退订方式为「关掉页面」，均即时生效。</p>
+      </div>
+    </article>
+
+    <aside>
+      <div class="box">
+        <h3>简 讯</h3>
+        <ul class="news">
+          <li><time>08月28日</time>友台《攀攀气象台》今日开播，主打内心天气预报，按时睡觉概率长期偏低。本报致以祝贺，并保持职业警惕。</li>
+          <li><time>08月26日</time>主笔将作息表调回人类时间，实验进入第三天，形势不容乐观。</li>
+          <li><time>08月22日</time>学会用两行代码解决原本二十行的问题，遂删掉十九行，含泪。</li>
+          <li><time>08月15日</time>菜市场番茄降价三成。本报认为此事与技术无关，但值得庆祝。</li>
+          <li><time>08月09日</time>主笔沉迷一本闲书，耽误正事。本报予以公开表扬。</li>
+        </ul>
+      </div>
+
+      <div class="box ad">
+        <h3>分类广告</h3>
+        <p>本人长期承接：修不好不收钱的电脑诊断、冷场救急的冷笑话、以及听你说烦心事（免费，限量）。</p>
+        <p>联系方式见第四版——第四版就在下面，别翻了。</p>
+      </div>
+
+      <div class="box">
+        <h3>填字游戏</h3>
+        <div class="cross" aria-hidden="true">
+          <i></i><i></i><i class="b"></i><i></i><i></i><i class="b"></i><i></i>
+          <i class="b"></i><i></i><i></i><i class="b"></i><i></i><i></i><i class="b"></i>
+          <i></i><i class="b"></i><i></i><i></i><i class="b"></i><i></i><i></i>
+          <i></i><i></i><i class="b"></i><i>攀</i><i class="b"></i><i></i><i></i>
+          <i></i><i class="b"></i><i></i><i>日</i><i class="b"></i><i></i><i></i>
+          <i class="b"></i><i></i><i></i><i>报</i><i></i><i></i><i class="b"></i>
+          <i></i><i></i><i class="b"></i><i></i><i></i><i class="b"></i><i></i>
+        </div>
+        <p style="font-size:11.5px;color:var(--soft);text-align:center;margin-top:.7rem;letter-spacing:.1em">
+          横向提示：无 · 纵向提示：看中间
+        </p>
+      </div>
+    </aside>
+  </main>
+
+  <footer class="colophon">
+    <span>攀攀日报 · 一人报社 · 只印真话与玩笑</span>
+    <span>转载请注明出处（虽然也没什么好转载的）</span>
+    <span class="stamp">付 印</span>
+  </footer>
+
+</div>
+
+<script>
+(function(){
+  var d = new Date();
+  var w = '日一二三四五六'.charAt(d.getDay());
+  document.getElementById('date').textContent =
+    d.getFullYear() + '年' + (d.getMonth() + 1) + '月' + d.getDate() + '日 星期' + w;
+  var day = Math.floor((d - new Date(d.getFullYear(), 0, 0)) / 864e5);
+  document.getElementById('qi').textContent = '第 ' + day + ' 期 · 总第 ' + day + ' 号';
+})();
+</script>
+</body>
+</html>

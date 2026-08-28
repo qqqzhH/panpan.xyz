@@ -1,0 +1,237 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>无题</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'><circle cx='32' cy='32' r='20' fill='none' stroke='%23141414' stroke-width='9'/></svg>">
+<style>
+  :root{
+    --bg:#f2f1ec;
+    --ink:#141414;
+    --acc:#ff4b00;
+  }
+  *{margin:0;padding:0;box-sizing:border-box}
+  html{scroll-behavior:smooth}
+  body{
+    font-family:"Microsoft YaHei","PingFang SC","Noto Sans SC",sans-serif;
+    background:var(--bg);color:var(--ink);
+    overflow-x:hidden;
+  }
+  ::selection{background:var(--acc);color:#fff}
+  a{color:inherit}
+
+  /* 八等分参考线 */
+  .grid-overlay{
+    position:fixed;inset:0;pointer-events:none;z-index:0;
+    background-image:repeating-linear-gradient(90deg, rgba(0,0,0,.05) 0 1px, transparent 1px 12.5%);
+  }
+
+  /* 现场时钟 */
+  #clock{
+    position:fixed;top:0;right:0;z-index:40;
+    font-family:Consolas,"Courier New",monospace;font-size:13px;
+    padding:10px 14px;border-left:2px solid var(--ink);border-bottom:2px solid var(--ink);
+    background:var(--bg);letter-spacing:.1em;
+  }
+
+  main{position:relative;z-index:1}
+
+  /* ---------- 开场：一个句号 ---------- */
+  .hero{
+    min-height:100vh;display:flex;flex-direction:column;
+    align-items:center;justify-content:center;gap:2.4rem;text-align:center;
+  }
+  .big-dot{
+    width:min(48vw,26rem);height:min(48vw,26rem);display:block;
+  }
+  .hero .hint{font-size:1rem;letter-spacing:.35em;text-indent:.35em}
+  .caret{
+    display:inline-block;width:.55em;height:1.05em;background:var(--ink);
+    vertical-align:-0.15em;margin-left:.3em;animation:blink 1s steps(1) infinite;
+  }
+  @keyframes blink{50%{opacity:0}}
+  .hero .scroll{
+    position:absolute;bottom:34px;font-size:12px;letter-spacing:.4em;
+  }
+
+  /* ---------- 跑马灯 ---------- */
+  .marquee{
+    border-top:2px solid var(--ink);border-bottom:2px solid var(--ink);
+    overflow:hidden;white-space:nowrap;padding:.55em 0;background:var(--bg);
+  }
+  .marquee .track{display:inline-block;animation:mq 16s linear infinite}
+  .marquee b{font-weight:900;letter-spacing:.2em;font-size:.95rem}
+  .marquee b em{font-style:normal;color:var(--acc)}
+  @keyframes mq{to{transform:translateX(-50%)}}
+
+  /* ---------- 编号章节 ---------- */
+  section.row{
+    display:grid;grid-template-columns:minmax(150px,1fr) 2.2fr;gap:2rem;
+    padding:6.5rem 6vw;border-bottom:2px solid var(--ink);align-items:start;
+  }
+  .no{
+    font-size:clamp(5rem,11vw,9rem);font-weight:900;line-height:.85;
+    color:transparent;-webkit-text-stroke:2.5px var(--ink);
+    transition:.3s;
+  }
+  section.row:hover .no{color:var(--ink)}
+  section.row h2{
+    font-size:clamp(1.6rem,3.4vw,2.4rem);font-weight:900;
+    letter-spacing:.14em;margin-bottom:1.6rem;
+  }
+  section.row p{line-height:2;color:#333;max-width:34em}
+
+  /* 在做：清单 */
+  .doing{list-style:none;border-top:2px solid var(--ink)}
+  .doing li{
+    display:flex;justify-content:space-between;gap:2rem;align-items:baseline;
+    border-bottom:1px solid var(--ink);padding:1rem .4rem;
+    transition:.2s;cursor:default;
+  }
+  .doing li:hover{background:var(--ink);color:var(--acc)}
+  .doing .tag{font-family:Consolas,monospace;font-size:.8rem;letter-spacing:.15em}
+
+  /* 碎片：2×2 拼格 */
+  .bits{display:grid;grid-template-columns:repeat(2,1fr);gap:0;border:2px solid var(--ink)}
+  .bits div{
+    padding:1.6rem 1.3rem;min-height:7.5rem;
+    border-right:1px solid var(--ink);border-bottom:1px solid var(--ink);
+    transition:.2s;font-size:.95rem;line-height:1.9;
+  }
+  .bits div:nth-child(2n){border-right:none}
+  .bits div:nth-child(n+3){border-bottom:none}
+  .bits div:hover{background:var(--acc);color:#fff}
+  .bits span{display:block;font-family:Consolas,monospace;font-size:.75rem;margin-bottom:.7rem;color:#777}
+  .bits div:hover span{color:#fff}
+
+  /* 找我 */
+  .mail{
+    font-size:clamp(1.5rem,4.6vw,3.2rem);font-weight:900;text-decoration:none;
+    border-bottom:6px solid var(--ink);transition:.25s;word-break:break-all;
+  }
+  .mail:hover{color:var(--acc);border-color:var(--acc)}
+
+  .ticket{
+    margin-top:3rem;display:inline-block;border:2px dashed var(--ink);
+    padding:1.6rem 2rem;font-family:Consolas,"Courier New",monospace;
+  }
+  .ticket .num{font-size:2.2rem;font-weight:700;letter-spacing:.1em}
+  .ticket button{
+    margin-top:.8rem;font-family:inherit;font-size:.85rem;letter-spacing:.2em;
+    background:var(--ink);color:var(--bg);border:none;padding:.55em 1.2em;cursor:pointer;
+    transition:.2s;
+  }
+  .ticket button:hover{background:var(--acc);color:#fff}
+  .ticket p{font-size:.72rem;color:#888;margin-top:.8rem;letter-spacing:.1em}
+
+  footer{
+    padding:3.2rem 6vw 4rem;font-size:.8rem;letter-spacing:.2em;color:#666;
+    display:flex;justify-content:space-between;gap:2rem;flex-wrap:wrap;
+  }
+
+  @media (max-width:640px){
+    section.row{grid-template-columns:1fr;gap:1.2rem;padding:4.5rem 7vw}
+    .bits{grid-template-columns:1fr}
+    .bits div,.bits div:nth-child(2n){border-right:none}
+    .bits div:nth-child(n+3){border-bottom:1px solid var(--ink)}
+    .bits div:last-child{border-bottom:none}
+  }
+</style>
+</head>
+<body>
+
+<div class="grid-overlay" aria-hidden="true"></div>
+<div id="clock">00:00:00</div>
+
+<main>
+  <section class="hero">
+    <svg class="big-dot" viewBox="0 0 100 100" aria-label="句号" role="img">
+      <circle cx="50" cy="50" r="40" fill="none" stroke="currentColor" stroke-width="9"/>
+    </svg>
+    <p class="hint">没有标题<span class="caret"></span></p>
+    <p class="hint" style="font-size:.8rem;color:#666">标题是给别人看的，这里是给自己的</p>
+    <div class="scroll">往下 ▼</div>
+  </section>
+
+  <div class="marquee" aria-hidden="true">
+    <div class="track" id="mq">
+      <b>原创 <em>ORIGINAL</em> ／ 不搬运 ／ 不模仿 ／ 只生长 ／ 原创 <em>ORIGINAL</em> ／ 不搬运 ／ 不模仿 ／ 只生长 ／ </b>
+    </div>
+  </div>
+
+  <section class="row">
+    <div class="no">01</div>
+    <div>
+      <h2>关于</h2>
+      <p>去掉标题之后，剩下的才是要紧的。这里住着一个具体的人：会修一些东西，会搞砸一些东西，正在慢慢学会区分这两者。姓名、头衔、所在地，都不重要——往下翻，看东西就行。</p>
+    </div>
+  </section>
+
+  <section class="row">
+    <div class="no">02</div>
+    <div>
+      <h2>在做</h2>
+      <ul class="doing">
+        <li><span>把手头这件小事做完</span><span class="tag">IN PROGRESS</span></li>
+        <li><span>学一门暂时没用的手艺</span><span class="tag">SINCE 2026</span></li>
+        <li><span>把这个没有标题的网站写完</span><span class="tag">ALIVE</span></li>
+        <li><span>早睡（长期项目）</span><span class="tag">FAILED / RETRY</span></li>
+      </ul>
+    </div>
+  </section>
+
+  <section class="row">
+    <div class="no">03</div>
+    <div>
+      <h2>碎片</h2>
+      <div class="bits">
+        <div><span>NO.001</span><p>东西坏了先别慌，大部分问题重启一次就好，剩下的问题值得高兴——说明是新问题。</p></div>
+        <div><span>NO.002</span><p>原创的意思不是没见过别人做的，而是做完发现跟谁都不一样。</p></div>
+        <div><span>NO.003</span><p>句号放在开头，是一种乐观：先承认结束，再开始。</p></div>
+        <div><span>NO.004</span><p>焦虑不能解决问题，但能提前上岗。</p></div>
+      </div>
+    </div>
+  </section>
+
+  <section class="row">
+    <div class="no">04</div>
+    <div>
+      <h2>找我</h2>
+      <a class="mail" href="mailto:you@example.com">you@example.com</a>
+      <div class="ticket">
+        <div class="num" id="tk">№ 000000</div>
+        <button id="again" type="button">再来一张</button>
+        <p>排队编号 · 纯属娱乐 · 与世界上任何排队系统无关</p>
+      </div>
+    </div>
+  </section>
+
+  <footer>
+    <span>本页由 0 与 1 手工排布</span>
+    <span>未经任何模板沾染 · 完稿于 2026</span>
+  </footer>
+</main>
+
+<script>
+(function(){
+  /* 现场时钟 */
+  var clock = document.getElementById('clock');
+  function tick(){ clock.textContent = new Date().toTimeString().slice(0,8); }
+  tick(); setInterval(tick, 1000);
+
+  /* 跑马灯内容复制一份，实现无缝循环 */
+  var mq = document.getElementById('mq');
+  mq.innerHTML += mq.innerHTML;
+
+  /* 排队编号 */
+  var tk = document.getElementById('tk');
+  function roll(){
+    tk.textContent = '№ ' + String(Math.floor(Math.random() * 1000000)).padStart(6, '0');
+  }
+  roll();
+  document.getElementById('again').addEventListener('click', roll);
+})();
+</script>
+</body>
+</html>

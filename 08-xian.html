@@ -1,0 +1,238 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>线 · 攀攀</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'><rect width='64' height='64' fill='%23fcfcfa'/><g stroke='%23141414' stroke-width='4' stroke-linecap='round'><line x1='12' y1='46' x2='52' y2='46'/><line x1='18' y1='33' x2='46' y2='33'/><line x1='24' y1='20' x2='40' y2='20'/></g></svg>">
+<style>
+  :root{
+    --bg:#fcfcfa;
+    --ink:#141414;
+    --gray:#8f8f89;
+    --hair:#e2e2dc;
+  }
+  *{margin:0;padding:0;box-sizing:border-box}
+  html{scroll-behavior:smooth}
+  body{
+    background:var(--bg);color:var(--ink);
+    font-family:"Microsoft YaHei","PingFang SC","Noto Sans SC",sans-serif;
+    line-height:2;overflow-x:hidden;
+  }
+  ::selection{background:var(--ink);color:var(--bg)}
+
+  /* 全页底纹：横向发丝线，像铺了一整张谱纸 */
+  .bg{
+    position:fixed;inset:0;pointer-events:none;z-index:0;
+    background:repeating-linear-gradient(180deg,transparent 0 27px,rgba(20,20,20,.05) 27px 28px);
+  }
+  .hero,main,footer{position:relative;z-index:1}
+
+  /* ---------- 开场：几十根横线长出一座山 ---------- */
+  .hero{
+    min-height:100vh;
+    display:flex;flex-direction:column;justify-content:center;align-items:center;
+    gap:4.5vh;padding:0 6vw;text-align:center;
+  }
+  .hero h1{
+    font-weight:800;font-size:clamp(2.6rem,7vw,4.6rem);
+    letter-spacing:.4em;text-indent:.4em;line-height:1.25;
+  }
+  .hero .sub{color:var(--gray);font-size:.9rem;letter-spacing:.3em;text-indent:.3em}
+  .field{
+    width:min(92vw,880px);height:clamp(170px,32vh,290px);
+    display:flex;flex-direction:column;justify-content:center;
+    gap:clamp(2px,.55vh,5px);
+  }
+  .field i{
+    display:block;height:1px;background:var(--ink);
+    width:0;margin:0 auto;flex:none;
+    transition:width 1s cubic-bezier(.2,.7,.2,1);
+  }
+
+  /* ---------- 章节：粗细双线分节 ---------- */
+  main{max-width:880px;margin:0 auto;padding:0 6vw 4vh}
+  .sec{margin-top:5.5rem}
+  .rule{border-top:3px solid var(--ink);position:relative;padding-top:2.5rem}
+  .rule::after{
+    content:"";position:absolute;top:5px;left:0;right:0;
+    border-top:1px solid var(--ink);
+  }
+  .sec .k{
+    display:flex;justify-content:space-between;align-items:baseline;
+    gap:.6rem;margin-bottom:2.2rem;flex-wrap:wrap;
+  }
+  .sec .k b{font-weight:700;letter-spacing:.5em;font-size:1.05rem}
+  .sec .k span{font-family:Consolas,monospace;color:var(--gray);font-size:.78rem;letter-spacing:.25em}
+
+  .about p{max-width:33em;color:#333;text-align:justify}
+  .about p + p{margin-top:1rem}
+
+  /* 在做：发丝行 + 底线生长 */
+  .lines{list-style:none;border-top:1px solid var(--hair)}
+  .lines li{position:relative;border-bottom:1px solid var(--hair)}
+  .lines li::after{
+    content:"";position:absolute;left:0;bottom:-1px;height:1px;width:0;
+    background:var(--ink);transition:width .4s ease;
+  }
+  .lines li:hover::after{width:100%}
+  .lines .t{
+    display:flex;justify-content:space-between;align-items:baseline;gap:1.4rem;
+    padding:1.05rem .3rem;flex-wrap:wrap;
+  }
+  .lines em{
+    font-style:normal;color:var(--gray);font-size:.78rem;
+    letter-spacing:.2em;white-space:nowrap;font-family:Consolas,monospace;
+  }
+  .lines .d{
+    display:block;color:var(--gray);font-size:.88rem;
+    padding:0 .3rem;max-height:0;overflow:hidden;opacity:0;transition:.4s ease;
+  }
+  .lines li:hover .d{max-height:4.5em;opacity:1;padding-bottom:1rem}
+
+  /* 找我：线框格，悬停以斜线肌理填充 */
+  .grid{display:grid;grid-template-columns:1fr 1fr;border:1px solid var(--ink)}
+  .grid a{
+    position:relative;text-decoration:none;color:var(--ink);
+    padding:2.4rem 1.8rem;display:flex;flex-direction:column;gap:.5rem;
+  }
+  .grid a + a{border-left:1px solid var(--ink)}
+  .grid a > *{position:relative;z-index:1}
+  .grid a::before{
+    content:"";position:absolute;inset:0;
+    background:repeating-linear-gradient(45deg,var(--ink) 0 1px,transparent 1px 7px);
+    opacity:0;transition:.35s;
+  }
+  .grid a b{letter-spacing:.3em;font-weight:700;font-size:.98rem}
+  .grid a i{font-style:normal;color:var(--gray);font-size:.82rem;letter-spacing:.06em;transition:.35s}
+  .grid a:hover{color:var(--bg)}
+  .grid a:hover i{color:#d8d8d2}
+  .grid a:hover::before{opacity:1}
+
+  footer{
+    max-width:880px;margin:7rem auto 0;padding:1.8rem 6vw 3.6rem;
+    border-top:3px solid var(--ink);position:relative;
+    display:flex;justify-content:space-between;align-items:baseline;
+    flex-wrap:wrap;gap:.8rem;
+    color:var(--gray);font-size:.78rem;letter-spacing:.18em;
+  }
+  footer::after{
+    content:"";position:absolute;top:5px;left:6vw;right:6vw;
+    border-top:1px solid var(--ink);
+  }
+  footer b{color:var(--ink);font-family:Consolas,monospace}
+
+  @media (max-width:640px){
+    .grid{grid-template-columns:1fr}
+    .grid a + a{border-left:none;border-top:1px solid var(--ink)}
+    .hero h1{letter-spacing:.25em;text-indent:.25em}
+  }
+  @media (prefers-reduced-motion:reduce){
+    .field i{transition:none}
+  }
+</style>
+</head>
+<body>
+
+<div class="bg" aria-hidden="true"></div>
+
+<header class="hero">
+  <h1>攀攀</h1>
+  <p class="sub">几十根线，一起画一座山</p>
+  <div class="field" id="field" aria-hidden="true"></div>
+</header>
+
+<main>
+  <section class="sec rule">
+    <div class="k"><b>关于</b><span>01 / WHO</span></div>
+    <div class="about">
+      <p>上一版想用一根线画山，被老板（我自己）当场驳回：太随意。这一版学乖了——线这种东西，一根是独奏，几十根才是合唱。</p>
+      <p>喜欢的东西没变：干净、克制、每根线都真的受力。底下这座山，就是四十几根横线商量出来的结果；山不是画出来的，是排出来的。</p>
+    </div>
+  </section>
+
+  <section class="sec rule">
+    <div class="k"><b>在做</b><span>02 / NOW</span></div>
+    <ul class="lines">
+      <li>
+        <span class="t"><span>把手头的事一件件做完</span><em>ONGOING</em></span>
+        <span class="d">不贪多。一次画一段，画完再画下一段。</span>
+      </li>
+      <li>
+        <span class="t"><span>早睡</span><em>FAILED / RETRY</em></span>
+        <span class="d">长期项目。线歪了就重画，不许断。</span>
+      </li>
+      <li>
+        <span class="t"><span>学一门暂时没用的手艺</span><em>QUEUED</em></span>
+        <span class="d">排队中。没用的线，最后往往最出彩。</span>
+      </li>
+    </ul>
+  </section>
+
+  <section class="sec rule">
+    <div class="k"><b>找我</b><span>03 / CONTACT</span></div>
+    <div class="grid">
+      <a href="mailto:you@example.com"><b>写信</b><i>you@example.com</i></a>
+      <a href="#"><b>别处</b><i>占位 · 以后填上</i></a>
+    </div>
+  </section>
+</main>
+
+<footer>
+  <span>线 · 攀攀</span>
+  <span>本页此刻约有 <b id="lc">—</b> 根线在场</span>
+</footer>
+
+<script>
+(function(){
+  /* 山形宽度剖面：两个高斯峰 → 主峰 + 伴峰 */
+  function profile(t){
+    function g(c, s){ var d = t - c; return Math.exp(-(d * d) / (2 * s * s)); }
+    var h = Math.max(g(.36, .12), g(.66, .07) * .62);
+    return 16 + 80 * h; /* 百分比宽度 */
+  }
+
+  var field = document.getElementById('field');
+  var N = 42;
+  var reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  function build(){
+    field.innerHTML = '';
+    var total = field.clientHeight || 1;
+    var gap = Math.max(2, Math.min(5, Math.round(total / N / 3)));
+    field.style.gap = gap + 'px';
+    for (var i = 0; i < N; i++) {
+      var bar = document.createElement('i');
+      var w = profile(i / (N - 1));
+      field.appendChild(bar);
+      if (reduce) {
+        bar.style.transition = 'none';
+        bar.style.width = w + '%';
+      } else {
+        bar.style.transitionDelay = (i * 22) + 'ms';
+        requestAnimationFrame(function(b, ww){
+          return function(){ b.style.width = ww + '%'; };
+        }(bar, w));
+      }
+    }
+    countLines();
+  }
+
+  /* 页脚彩蛋：数一数此刻页面上有多少根线 */
+  function countLines(){
+    var bg    = Math.round(window.innerHeight / 28);           /* 底纹发丝线 */
+    var bars  = field.children.length;                          /* 山的横线 */
+    var rules = document.querySelectorAll('.rule, footer, .lines li, .grid, .grid a').length;
+    document.getElementById('lc').textContent = '≈' + (bg + bars + rules);
+  }
+
+  var tm;
+  window.addEventListener('resize', function(){
+    clearTimeout(tm);
+    tm = setTimeout(build, 200);
+  });
+  window.addEventListener('load', build);
+})();
+</script>
+</body>
+</html>
