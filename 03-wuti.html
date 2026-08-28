@@ -225,15 +225,15 @@
     <div>
       <h2>新闻站</h2>
       <div class="sites">
-        <a class="site" href="https://github.com/qqqzhH/li-news" target="_blank" rel="noopener">
+        <a class="site" href="https://li-news.pages.dev/" target="_blank" rel="noopener">
           <span class="head"><b>木子新闻</b><span class="style">AI 快报 · LI-NEWS ↗</span></span>
           <p>AI 驱动的科技新闻聚合：每天早上九点自动采集，AI 分类、AI 解读，静态部署在 Cloudflare Pages。AI、机器人、地缘政治、财经，四个频道各领一群。</p>
         </a>
-        <a class="site" href="moji_daily.html">
+        <a class="site" href="https://li-news.pages.dev/moji_daily.html">
           <span class="head"><b>墨极·日报</b><span class="style">纸墨日报 · MOJI DAILY</span></span>
           <p>三色印刷的纸上日报：米白纸底、浓墨标题、朱砂批注。头条深读、要闻速览、往期翻期——新闻按老报纸的规矩排版。</p>
         </a>
-        <a class="site" href="market.html">
+        <a class="site" href="https://li-news.pages.dev/market.html">
           <span class="head"><b>纸上集市</b><span class="style">集市陈列 · MARKET</span></span>
           <p>把看新闻过成赶集：条目像摊位一样沿街陈列，随便逛、随便挑，讨价还价就免了。</p>
         </a>
@@ -267,9 +267,15 @@
   function tick(){ clock.textContent = new Date().toTimeString().slice(0,8); }
   tick(); setInterval(tick, 1000);
 
-  /* 跑马灯内容复制一份，实现无缝循环 */
+  /* 跑马灯：复制到铺满整条横杠为止（份数保持 2 的幂，循环无缝） */
   var mq = document.getElementById('mq');
-  mq.innerHTML += mq.innerHTML;
+  var base = mq.innerHTML;
+  function fillMarquee(){
+    mq.innerHTML = base + base;
+    while (mq.scrollWidth < window.innerWidth * 2) mq.innerHTML += mq.innerHTML;
+  }
+  fillMarquee();
+  window.addEventListener('resize', fillMarquee);
 
   /* 排队编号 */
   var tk = document.getElementById('tk');
