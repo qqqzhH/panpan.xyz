@@ -92,6 +92,26 @@
   .doing li:hover{background:var(--ink);color:var(--acc)}
   .doing .tag{font-family:Consolas,monospace;font-size:.8rem;letter-spacing:.15em}
 
+  /* 新闻站 */
+  .sites{border-top:2px solid var(--ink)}
+  a.site{
+    display:block;text-decoration:none;color:inherit;
+    border-bottom:1px solid var(--ink);padding:1.5rem .5rem;transition:.2s;
+  }
+  a.site .head{
+    display:flex;justify-content:space-between;align-items:baseline;gap:1rem;flex-wrap:wrap;
+  }
+  a.site .head b{font-size:1.35rem;font-weight:900;letter-spacing:.12em}
+  a.site .head .style{
+    font-family:Consolas,monospace;font-size:.72rem;letter-spacing:.18em;
+    color:#888;border:1px solid #ccc;padding:.25em .7em;white-space:nowrap;
+  }
+  a.site p{color:#555;margin-top:.55rem;line-height:1.95;max-width:36em}
+  a.site:hover{background:var(--ink)}
+  a.site:hover .head b{color:var(--acc)}
+  a.site:hover p{color:#ccc}
+  a.site:hover .head .style{color:#bbb;border-color:#555}
+
   /* 碎片：2×2 拼格 */
   .bits{display:grid;grid-template-columns:repeat(2,1fr);gap:0;border:2px solid var(--ink)}
   .bits div{
@@ -100,10 +120,14 @@
     transition:.2s;font-size:.95rem;line-height:1.9;
   }
   .bits div:nth-child(2n){border-right:none}
-  .bits div:nth-child(n+3){border-bottom:none}
+  .bits div:nth-child(n+5){border-bottom:none}
   .bits div:hover{background:var(--acc);color:#fff}
   .bits span{display:block;font-family:Consolas,monospace;font-size:.75rem;margin-bottom:.7rem;color:#777}
   .bits div:hover span{color:#fff}
+  .bits span a{
+    color:inherit;text-decoration:none;
+    border-bottom:1px dashed currentColor;padding-bottom:1px;
+  }
 
   /* 找我 */
   .mail{
@@ -156,7 +180,7 @@
 
   <div class="marquee" aria-hidden="true">
     <div class="track" id="mq">
-      <b>原创 <em>ORIGINAL</em> ／ 不搬运 ／ 不模仿 ／ 只生长 ／ 原创 <em>ORIGINAL</em> ／ 不搬运 ／ 不模仿 ／ 只生长 ／ </b>
+      <b>永远保持好奇心 ／ 无限进步 ／ 永远热爱生活 ／ <em>永远热泪盈眶</em> ／ </b>
     </div>
   </div>
 
@@ -190,12 +214,35 @@
         <div><span>NO.002</span><p>原创的意思不是没见过别人做的，而是做完发现跟谁都不一样。</p></div>
         <div><span>NO.003</span><p>句号放在开头，是一种乐观：先承认结束，再开始。</p></div>
         <div><span>NO.004</span><p>焦虑不能解决问题，但能提前上岗。</p></div>
+        <div><span>NO.005 · <a href="04-ribao.html">攀攀日报</a></span><p>把自己办成一份对开报纸：报头、头条、简讯、分类广告，期数按当天日期自动计算。</p></div>
+        <div><span>NO.006 · <a href="06-liubai.html">留白</a></span><p>一屏只有一句话的安静页面：大段留白，滚动渐显。安静的人做的安静网页。</p></div>
       </div>
     </div>
   </section>
 
   <section class="row">
     <div class="no">04</div>
+    <div>
+      <h2>新闻站</h2>
+      <div class="sites">
+        <a class="site" href="https://github.com/qqqzhH/li-news" target="_blank" rel="noopener">
+          <span class="head"><b>木子新闻</b><span class="style">AI 快报 · LI-NEWS ↗</span></span>
+          <p>AI 驱动的科技新闻聚合：每天早上九点自动采集，AI 分类、AI 解读，静态部署在 Cloudflare Pages。AI、机器人、地缘政治、财经，四个频道各领一群。</p>
+        </a>
+        <a class="site" href="moji_daily.html">
+          <span class="head"><b>墨极·日报</b><span class="style">纸墨日报 · MOJI DAILY</span></span>
+          <p>三色印刷的纸上日报：米白纸底、浓墨标题、朱砂批注。头条深读、要闻速览、往期翻期——新闻按老报纸的规矩排版。</p>
+        </a>
+        <a class="site" href="market.html">
+          <span class="head"><b>纸上集市</b><span class="style">集市陈列 · MARKET</span></span>
+          <p>把看新闻过成赶集：条目像摊位一样沿街陈列，随便逛、随便挑，讨价还价就免了。</p>
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <section class="row">
+    <div class="no">05</div>
     <div>
       <h2>找我</h2>
       <a class="mail" href="mailto:you@example.com">you@example.com</a>
