@@ -50,15 +50,14 @@
   document.addEventListener("visibilitychange", onVisibility);
 
   /* ---------- 深夜提示条 (22点-6点) ---------- */
-  function checkNight() {
+  function isNight() {
     var h = new Date().getHours();
+    return h >= 22 || h < 6;
+  }
+  function checkNight() {
     var el = document.getElementById("night-bar");
     if (!el) return;
-    if (h >= 22 || h < 6) {
-      el.classList.remove("hidden");
-    } else {
-      el.classList.add("hidden");
-    }
+    el.classList.toggle("hidden", !isNight());
   }
   checkNight();
   var nightTimer = setInterval(checkNight, 60000);
@@ -76,14 +75,14 @@
   }
   window.addEventListener("keydown", onKey);
 
-  /* ---------- 写入深夜提示条 + 黑客指示器 (若页面无则注入) ---------- */
+  /* ---------- 写入深夜提示条 + 黑客指示器 (若页面无则注入，注入即带正确状态) ---------- */
   function ensureEls() {
     if (!document.getElementById("night-bar")) {
       var nb = document.createElement("div");
       nb.id = "night-bar";
-      nb.className = "night-bar";
+      nb.className = "night-bar" + (isNight() ? "" : " hidden");
       nb.innerHTML =
-        '<span>🌙</span> 深夜了，还在看？注意休息哦 <span class="night-face">(´･ω･`)</span>';
+        '<span class="nb-tag">NIGHT SHIFT</span> 深夜了，新闻明天还在，注意休息 <span class="night-face">(´･ω･`)</span>';
       document.body.appendChild(nb);
     }
     if (!document.getElementById("hacker-tag")) {
@@ -94,6 +93,7 @@
       ht.textContent = "HACKER MODE • Ctrl+H";
       document.body.appendChild(ht);
     }
+    checkNight();
   }
   if (document.readyState === "loading") {
     document.addEventListener("DOMContentLoaded", ensureEls);

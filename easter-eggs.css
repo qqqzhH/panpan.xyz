@@ -3,28 +3,41 @@
    （与 EasterEggs.tsx 一致的黑/夜风，独立于各页面主样式）
    ============================================================ */
 
-/* 深夜提示条 */
+/* 深夜提示条 · 无题风：纸底 / 墨框 / 硬阴影 / 直角 */
 .night-bar{
   position:fixed;
   bottom:24px;
   left:50%;
   transform:translateX(-50%);
   z-index:9999;
-  padding:10px 20px;
-  border-radius:9999px;
-  background:linear-gradient(90deg, rgba(30,27,75,.92), rgba(15,15,30,.92));
-  border:1px solid rgba(99,102,241,.5);
-  box-shadow:0 4px 16px rgba(0,0,0,.35);
-  backdrop-filter:blur(6px);
-  color:#c7d2fe;
-  font-size:14px;
+  padding:10px 16px;
+  background:#f2f1ec;
+  border:2px solid #141414;
+  border-radius:0;
+  box-shadow:4px 4px 0 #141414;
+  color:#141414;
+  font-size:13px;
+  letter-spacing:.08em;
+  font-family:"Microsoft YaHei","PingFang SC","Noto Sans SC",sans-serif;
   display:flex;
   align-items:center;
-  gap:8px;
+  gap:10px;
   pointer-events:none;
+  white-space:nowrap;
 }
 .night-bar.hidden{ display:none !important; }
-.night-bar .night-face{ color:#a5b4fc; font-size:12px; margin-left:4px; }
+.night-bar .nb-tag{
+  font-family:Consolas,"Courier New",monospace;
+  font-size:10px;
+  letter-spacing:.18em;
+  color:#f2f1ec;
+  background:#141414;
+  padding:.3em .65em;
+}
+.night-bar .night-face{ color:#ff4b00; font-size:12px; margin-left:2px; }
+@media (max-width:640px){
+  .night-bar{ max-width:92vw; white-space:normal; padding:8px 12px; box-shadow:3px 3px 0 #141414; }
+}
 
 /* 黑客模式指示器 */
 .hacker-tag{
