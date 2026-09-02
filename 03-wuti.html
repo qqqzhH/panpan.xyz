@@ -111,6 +111,18 @@
   a.site:hover .head b{color:var(--acc)}
   a.site:hover p{color:#ccc}
   a.site:hover .head .style{color:#bbb;border-color:#555}
+  /* 墨极·占：朱砂色突出卡 */
+  a.site-fortune{
+    background:linear-gradient(135deg,#c0392b,#8f2e24);
+    color:#f5f2ec;border-bottom:2px solid #6d1f18;
+  }
+  a.site-fortune .head b{color:#f5f2ec}
+  a.site-fortune .head .style{color:#f5d9a0;border-color:rgba(245,217,160,.5)}
+  a.site-fortune p{color:rgba(245,242,236,.85)}
+  a.site-fortune:hover{background:#8f2e24}
+  a.site-fortune:hover .head b{color:#f5d9a0}
+  a.site-fortune:hover p{color:#f5f2ec}
+  a.site-fortune:hover .head .style{color:#f5d9a0;border-color:#f5d9a0}
 
   /* 碎片：2×2 拼格 */
   .bits{display:grid;grid-template-columns:repeat(2,1fr);gap:0;border:2px solid var(--ink)}
@@ -238,6 +250,10 @@
         <a class="site" href="archive.html">
           <span class="head"><b>墨极·日报·档案馆</b><span class="style">温故知新 · ARCHIVE</span></span>
           <p>墨极·日报的往期存档：一期一格，随点随读。旧报纸不糊，旧新闻别有一番味道。</p>
+        </a>
+        <a class="site site-fortune" href="https://fortune.xn--d9ua.xyz" target="_blank" rel="noopener">
+          <span class="head"><b>墨极·占</b><span class="style">命理占卜 · MOJI FORTUNE</span></span>
+          <p>塔罗问心，小六壬断事。黑白两色的世界里，这里有一点朱砂红。登录即领每日免费次数。</p>
         </a>
       </div>
     </div>
