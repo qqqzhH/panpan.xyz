@@ -1,0 +1,20 @@
+# 木子新闻路由 → 实时 li-news 站（9/6 起：8/28 冻结导出退役，数据以 li-news.pages.dev 实时站为准）
+/news https://li-news.pages.dev/ 302
+/news.html https://li-news.pages.dev/ 302
+/ai https://li-news.pages.dev/ai 302
+/ai.html https://li-news.pages.dev/ai 302
+/ai/* https://li-news.pages.dev/ai/:splat 302
+/finance https://li-news.pages.dev/finance 302
+/finance.html https://li-news.pages.dev/finance 302
+/finance/* https://li-news.pages.dev/finance/:splat 302
+/geopolitics https://li-news.pages.dev/geopolitics 302
+/geopolitics.html https://li-news.pages.dev/geopolitics 302
+/geopolitics/* https://li-news.pages.dev/geopolitics/:splat 302
+/robotics https://li-news.pages.dev/robotics 302
+/robotics.html https://li-news.pages.dev/robotics 302
+/robotics/* https://li-news.pages.dev/robotics/:splat 302
+/search https://li-news.pages.dev/search 302
+/search.html https://li-news.pages.dev/search 302
+/other https://li-news.pages.dev/other 302
+/other.html https://li-news.pages.dev/other 302
+/other/* https://li-news.pages.dev/other/:splat 302
