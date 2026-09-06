@@ -1018,12 +1018,9 @@ def main():
     prev_issue, prev_date = parse_prev(args.out)
     if args.issue:
         issue = args.issue
-    elif prev_issue is None:
-        raise SystemExit("无法推断期数：旧页缺失且未给 --issue")
-    elif prev_date and prev_date == target:
-        issue = prev_issue          # 同日重生成：期数不变
     else:
-        issue = prev_issue + 1
+        # 期数口径 = 年内第几天（与 archive 页 issueOf 一致：8/28=240、9/6=249）
+        issue = target.timetuple().tm_yday
 
     data = fetch_news(args)
     items = data["items"]
