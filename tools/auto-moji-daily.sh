@@ -3,7 +3,7 @@
 # 由 Windows 任务计划 GenMojiDaily 每日 10:27 调起（新闻采集 9:00 + 同步之后）
 set -u
 SITE="C:/Users/MI/ZCodeProject/personal-site"
-LOG="C:/Users/MI/ZCodeProject/personal-site/tools/gen-moji-daily.log"
+LOG="$SITE/tools/gen-moji-daily.log"
 cd "$SITE" || exit 1
 echo "[$(date '+%F %T')] gen start" >> "$LOG"
 git pull --rebase origin main >> "$LOG" 2>&1 || { echo "[$(date '+%F %T')] pull FAILED" >> "$LOG"; exit 1; }
