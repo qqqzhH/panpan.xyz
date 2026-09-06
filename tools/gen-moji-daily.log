@@ -120,3 +120,7 @@ Already up to date.
   [PASS] <h3> 标签配平（15/15）
 自验全部通过。
 [2026-09-06 19:17:31] no change, skip
+[2026-09-06 20:11:26] gen start
+error: cannot pull with rebase: You have unstaged changes.
+error: Please commit or stash them.
+[2026-09-06 20:11:26] pull FAILED
