@@ -6,6 +6,15 @@ SITE="C:/Users/MI/ZCodeProject/personal-site"
 LOG="$SITE/tools/gen-moji-daily.log"
 cd "$SITE" || exit 1
 echo "[$(date '+%F %T')] gen start" >> "$LOG"
+# 自愈防复发（9/07-9/25 事故：9/6 手工残渣 M moji_daily.html + 未跟踪副本让 pull 连败 19 天）：
+# 生成物 moji_daily.html 每次运行都会整体重写，脏了直接复位；误命名的 moji_daily_YYYYMMDD.html 副本清掉。
+git checkout -- moji_daily.html 2>/dev/null
+rm -f moji_daily_2026*.html
+if ! git diff --quiet || [ -n "$(git status --porcelain)" ]; then
+  echo "[$(date '+%F %T')] ABORT: worktree still dirty after self-heal (unexpected files), manual check needed" >> "$LOG"
+  git status --porcelain >> "$LOG"
+  exit 1
+fi
 git pull --rebase origin main >> "$LOG" 2>&1 || { echo "[$(date '+%F %T')] pull FAILED" >> "$LOG"; exit 1; }
 python tools/gen-moji-daily.py >> "$LOG" 2>&1 || { echo "[$(date '+%F %T')] gen FAILED" >> "$LOG"; exit 1; }
 # archive 温故知新页同步最近 7 天数据（ssh 拉最新 news.json）
