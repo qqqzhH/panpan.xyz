@@ -27,6 +27,8 @@ rm -f "$SITE/tools/.news-tmp.json"
 [ -f moji_daily.html ] && cp moji_daily.html "墨极·$(date +%Y%m%d).html"
 if git status --porcelain -- moji_daily.html archive.html "墨极·$(date +%Y%m%d).html" | grep -q .; then
   git add moji_daily.html archive.html "墨极·$(date +%Y%m%d).html"
+  # 生成器的旧版留档（moji_daily_YYYYMMDD.html，见 gen-moji-daily.py 覆盖前留档逻辑）一并入库，避免 untracked 残留
+  for f in moji_daily_2026*.html; do [ -e "$f" ] && git add "$f"; done
   git commit -m "auto: 墨极日报每日更新 $(date '+%F')" >> "$LOG" 2>&1
   git push origin main >> "$LOG" 2>&1 || { echo "[$(date '+%F %T')] push FAILED" >> "$LOG"; exit 1; }
   echo "[$(date '+%F %T')] published -> CF Pages deploying" >> "$LOG"
