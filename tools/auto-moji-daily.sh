@@ -7,9 +7,10 @@ LOG="$SITE/tools/gen-moji-daily.log"
 cd "$SITE" || exit 1
 echo "[$(date '+%F %T')] gen start" >> "$LOG"
 # 自愈防复发（9/07-9/25 事故：9/6 手工残渣 M moji_daily.html + 未跟踪副本让 pull 连败 19 天）：
-# 生成物 moji_daily.html 每次运行都会整体重写，脏了直接复位；误命名的 moji_daily_YYYYMMDD.html 副本清掉。
+# 生成物 moji_daily.html 每次运行都会整体重写，脏了直接复位；未跟踪的 moji_daily_YYYYMMDD.html 误命名副本清掉
+# （只清 untracked——moji_daily_20260828.html 等旧命名体系文件是被跟踪的历史页面，不能动）。
 git checkout -- moji_daily.html 2>/dev/null
-rm -f moji_daily_2026*.html
+git clean -f -q moji_daily_2026*.html 2>/dev/null
 if ! git diff --quiet || [ -n "$(git status --porcelain)" ]; then
   echo "[$(date '+%F %T')] ABORT: worktree still dirty after self-heal (unexpected files), manual check needed" >> "$LOG"
   git status --porcelain >> "$LOG"
